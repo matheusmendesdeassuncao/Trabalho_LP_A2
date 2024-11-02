@@ -12,10 +12,10 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
 # Configuração da tela
-SCREEN_WIDTH = 1280
+SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 750
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Fireboy & Watergirl")
+pygame.display.set_caption("As Aventuras de Helora e Gabrela")  # Nome do jogo
 
 # Função para carregar e redimensionar imagem
 def load_image(image_path, file_name, width, height):
@@ -30,20 +30,20 @@ def load_image(image_path, file_name, width, height):
 # Atualiza o caminho para a pasta 'assets'
 current_path = os.path.dirname(__file__)  # Local do arquivo
 image_path = os.path.abspath(os.path.join(current_path, '..', 'assets'))  # Caminho para a pasta 'assets'
-fireboy_img = load_image(image_path, 'fireboy.png', 64, 64)
-watergirl_img = load_image(image_path, 'watergirl.png', 64, 64)
+louriskelly_img = load_image(image_path, 'fireboy.png', 64, 64)  # Imagem do LourisKelly
+gabikkk_img = load_image(image_path, 'watergirl.png', 64, 64)  # Imagem da Gabikkkk
 
-if fireboy_img is None or watergirl_img is None:
+if louriskelly_img is None or gabikkk_img is None:
     print("Erro: Imagem não encontrada.")
     pygame.quit()
     exit()
 
 class Obstacle:
     def __init__(self, x, y):
-        self.rect = pygame.Rect(x, y, 50, 50)  # Define a posição e o tamanho do obstáculo
+        self.rect = pygame.Rect(x, y, 32, 32)  # Define a posição e o tamanho do obstáculo
 
     def draw(self, screen: pygame.Surface):
-        pygame.draw.rect(screen, BLUE, self.rect)  # Desenha o obstáculo
+        pygame.draw.rect(screen, BLACK, self.rect)  # Desenha o obstáculo em preto
 
 class Player:
     def __init__(self, x: int, y: int, image, width: int = 64, height: int = 64):
@@ -72,20 +72,21 @@ class Player:
                 self.vel_y = 0
 
     def on_collision(self, other):
-        if self.rect.colliderect(other.rect):
-            # Se está caindo
-            if self.vel_y > 0:  
-                self.rect.bottom = other.rect.top  # Ajusta para cima do obstáculo
-                self.is_jumping = False
-                self.vel_y = 0
-            elif self.vel_y < 0:  # Se está subindo
-                self.rect.top = other.rect.bottom  # Ajusta para baixo do obstáculo
+        if not self.rect.colliderect(other.rect):
+            return
 
-            # Restringe a movimentação horizontal se colidir nas laterais
-            if self.rect.right > other.rect.left and self.rect.left < other.rect.left:
-                self.rect.right = other.rect.left  # Colisão à esquerda
-            elif self.rect.left < other.rect.right and self.rect.right > other.rect.right:
-                self.rect.left = other.rect.right  # Colisão à direita
+        if isinstance(other, Obstacle):
+            if self.vel_y > 0:  # Colisão descendo
+                self.rect.bottom = other.rect.top  # Ajusta o personagem para ficar sobre o chão
+                self.is_jumping = False  # Permite pular novamente ao tocar o chão
+                self.vel_y = 0  # Zera a velocidade vertical
+            elif self.vel_y < 0:  # Colisão subindo
+                self.rect.top = other.rect.bottom  # Ajusta a posição do personagem
+                self.vel_y = 0  # Zera a velocidade vertical
+            elif self.rect.right > other.rect.left and self.rect.left < other.rect.left:  # Colisão pela esquerda
+                self.rect.right = other.rect.left
+            elif self.rect.left < other.rect.right and self.rect.right > other.rect.right:  # Colisão pela direita
+                self.rect.left = other.rect.right
 
     def move(self, dx):
         self.rect.x += dx
@@ -107,9 +108,9 @@ class Player:
         if self.is_alive:  # Desenha o jogador somente se estiver vivo
             screen.blit(self.image, self.rect.topleft)
 
-# Posições iniciais
-fireboy = Player(100, 700, fireboy_img, 64, 64)  # Posição inicial do Fireboy
-watergirl = Player(200, 700, watergirl_img, 64, 64)  # Posição inicial da Watergirl
+# Posições iniciais ajustadas
+louriskelly = Player(100, 600, louriskelly_img, 64, 64)  # Posição inicial do LourisKelly (dentro da tela)
+gabikkk = Player(200, 600, gabikkk_img, 64, 64)  # Posição inicial da Gabikkkk (dentro da tela)
 
 # Função para carregar nível
 def load_level():
@@ -143,77 +144,74 @@ def load_level():
 
 # Função para desenhar o nível
 def draw_level(screen, level):
+    obstacles = []  # Lista de obstáculos
     for y, row in enumerate(level):
         for x, char in enumerate(row):
             if char == "#":
-                pygame.draw.rect(screen, BLACK, (x * 32, y * 32, 32, 32))
+                pygame.draw.rect(screen, BLACK, (x * 32, y * 32, 32, 32))  # Desenha a parede em preto
+                obstacles.append(Obstacle(x * 32, y * 32))  # Adiciona à lista de obstáculos
             elif char == "F":
-                pygame.draw.rect(screen, RED, (x * 32, y * 32, 32, 32))
+                pygame.draw.rect(screen, RED, (x * 32, y * 32, 32, 32))  # Área de vitória do LourisKelly
             elif char == "E":
-                pygame.draw.rect(screen, BLUE, (x * 32, y * 32, 32, 32))
+                pygame.draw.rect(screen, BLUE, (x * 32, y * 32, 32, 32))  # Área de vitória do Gabikkkk
             elif char == "T":
-                pygame.draw.rect(screen, GREEN, (x * 32, y * 32, 32, 32))
+                pygame.draw.rect(screen, GREEN, (x * 32, y * 32, 32, 32))  # Ponto de interesse
+    return obstacles  # Retorna a lista de obstáculos
 
 # Função para verificar vitória
-def check_victory(fireboy, watergirl, level):
+def check_victory(louriskelly, gabikkk, level):
     fireboy_victory = False
-    if 0 <= fireboy.rect.y // 32 < len(level) and 0 <= fireboy.rect.x // 32 < len(level[0]):
-        fireboy_victory = level[fireboy.rect.y // 32][fireboy.rect.x // 32] == "F"
+    if 0 <= louriskelly.rect.y // 32 < len(level) and 0 <= louriskelly.rect.x // 32 < len(level[0]):
+        fireboy_victory = level[louriskelly.rect.y // 32][louriskelly.rect.x // 32] == "F"
     
     watergirl_victory = False
-    if 0 <= watergirl.rect.y // 32 < len(level) and 0 <= watergirl.rect.x // 32 < len(level[0]):
-        watergirl_victory = level[watergirl.rect.y // 32][watergirl.rect.x // 32] == "E"
+    if 0 <= gabikkk.rect.y // 32 < len(level) and 0 <= gabikkk.rect.x // 32 < len(level[0]):
+        watergirl_victory = level[gabikkk.rect.y // 32][gabikkk.rect.x // 32] == "E"
     
     return fireboy_victory and watergirl_victory
-
-# Lista de obstáculos (apenas um, perto do canto superior direito)
-obstacles = [Obstacle(1150, 50)]  # Obstáculo azul na parte superior direita
 
 # Loop principal
 running = True
 clock = pygame.time.Clock()
 
+level = load_level()  # Carrega o nível apenas uma vez antes do loop
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        
-        # Verifica eventos apenas para Watergirl
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:  # Pula somente se estiver vivo
-                watergirl.jump()
 
-    # Controle do personagem Fireboy com W, A, S, D
+    # Controle do personagem LourisKelly com W, A, S, D
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a]:
-        fireboy.move(-fireboy.speed)
+        louriskelly.move(-louriskelly.speed)
     if keys[pygame.K_d]:
-        fireboy.move(fireboy.speed)
-    if keys[pygame.K_w]:  # Usado para pular Fireboy
-        fireboy.jump()
+        louriskelly.move(louriskelly.speed)
+    if keys[pygame.K_w]:  # Usado para pular LourisKelly
+        louriskelly.jump()
 
-    # Controle do personagem Watergirl com setas
+    # Controle do personagem Gabikkkk com setas
     if keys[pygame.K_LEFT]:
-        watergirl.move(-watergirl.speed)
+        gabikkk.move(-gabikkk.speed)
     if keys[pygame.K_RIGHT]:
-        watergirl.move(watergirl.speed)
+        gabikkk.move(gabikkk.speed)
+    if keys[pygame.K_UP]:  # Usado para pular Gabikkkk
+        gabikkk.jump()
 
-    # Atualiza o estado dos jogadores
-    fireboy.update(obstacles)
-    watergirl.update(obstacles)
+    # Limpa a tela
+    screen.fill(WHITE)
+
+    # Desenha o nível e atualiza obstáculos
+    obstacles = draw_level(screen, level)  # Gera e desenha obstáculos
+    louriskelly.update(obstacles)  # Atualiza LourisKelly
+    gabikkk.update(obstacles)  # Atualiza Gabikkkk
+    louriskelly.draw(screen)  # Desenha LourisKelly
+    gabikkk.draw(screen)  # Desenha Gabikkkk
 
     # Verifica vitória
-    if check_victory(fireboy, watergirl, load_level()):
+    if check_victory(louriskelly, gabikkk, level):
         print("Vitória!")
         running = False
-
-    # Desenha tudo
-    screen.fill(WHITE)
-    draw_level(screen, load_level())
-    for obstacle in obstacles:
-        obstacle.draw(screen)  # Desenha obstáculos
-    fireboy.draw(screen)
-    watergirl.draw(screen)
 
     pygame.display.flip()
     clock.tick(60)  # Limita a 60 quadros por segundo
