@@ -30,8 +30,8 @@ def load_image(image_path, file_name, width, height):
 # Atualiza o caminho para a pasta 'assets'
 current_path = os.path.dirname(__file__)  # Local do arquivo
 image_path = os.path.abspath(os.path.join(current_path, '..', 'assets'))  # Caminho para a pasta 'assets'
-louriskelly_img = load_image(image_path, 'fireboy.png', 64, 64)  # Imagem do LourisKelly
-gabikkk_img = load_image(image_path, 'watergirl.png', 64, 64)  # Imagem da Gabikkkk
+louriskelly_img = load_image(image_path, 'helora.png', 64, 64)  # Imagem do LourisKelly
+gabikkk_img = load_image(image_path, 'gabi.png', 64, 64)  # Imagem da Gabikkkk
 
 if louriskelly_img is None or gabikkk_img is None:
     print("Erro: Imagem não encontrada.")
@@ -108,6 +108,12 @@ class Player:
         if self.is_alive:  # Desenha o jogador somente se estiver vivo
             screen.blit(self.image, self.rect.topleft)
 
+    def check_death(self, level):
+        # Verifica se o personagem colidiu com a área de morte (quadrado verde)
+        if 0 <= self.rect.y // 32 < len(level) and 0 <= self.rect.x // 32 < len(level[0]):
+            return level[self.rect.y // 32][self.rect.x // 32] == "T"
+        return False
+
 # Posições iniciais ajustadas
 louriskelly = Player(100, 600, louriskelly_img, 64, 64)  # Posição inicial do LourisKelly (dentro da tela)
 gabikkk = Player(200, 600, gabikkk_img, 64, 64)  # Posição inicial da Gabikkkk (dentro da tela)
@@ -160,15 +166,16 @@ def draw_level(screen, level):
 
 # Função para verificar vitória
 def check_victory(louriskelly, gabikkk, level):
-    fireboy_victory = False
+    fireboy_victory = louriskelly.check_death(level)
+    watergirl_victory = gabikkk.check_death(level)
+
     if 0 <= louriskelly.rect.y // 32 < len(level) and 0 <= louriskelly.rect.x // 32 < len(level[0]):
         fireboy_victory = level[louriskelly.rect.y // 32][louriskelly.rect.x // 32] == "F"
     
-    watergirl_victory = False
     if 0 <= gabikkk.rect.y // 32 < len(level) and 0 <= gabikkk.rect.x // 32 < len(level[0]):
         watergirl_victory = level[gabikkk.rect.y // 32][gabikkk.rect.x // 32] == "E"
     
-    return fireboy_victory and watergirl_victory
+    return fireboy_victory and watergirl_victory, fireboy_victory, watergirl_victory
 
 # Loop principal
 running = True
@@ -181,7 +188,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Controle do personagem LourisKelly com W, A, S, D
+    # Controle do personagem LourisKelly
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a]:
         louriskelly.move(-louriskelly.speed)
@@ -190,7 +197,7 @@ while running:
     if keys[pygame.K_w]:  # Usado para pular LourisKelly
         louriskelly.jump()
 
-    # Controle do personagem Gabikkkk com setas
+    # Controle do personagem Gabikkkk
     if keys[pygame.K_LEFT]:
         gabikkk.move(-gabikkk.speed)
     if keys[pygame.K_RIGHT]:
@@ -209,9 +216,18 @@ while running:
     gabikkk.draw(screen)  # Desenha Gabikkkk
 
     # Verifica vitória
-    if check_victory(louriskelly, gabikkk, level):
+    victory, fireboy_victory, watergirl_victory = check_victory(louriskelly, gabikkk, level)
+    if victory:
         print("Vitória!")
         running = False
+    else:
+        # Verifica morte
+        if louriskelly.check_death(level):
+            print("LourisKelly morreu!")
+            running = False
+        if gabikkk.check_death(level):
+            print("Gabikkkk morreu!")
+            running = False
 
     pygame.display.flip()
     clock.tick(60)  # Limita a 60 quadros por segundo
