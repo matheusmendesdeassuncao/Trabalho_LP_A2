@@ -10,12 +10,14 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
+CIAN = (0, 255, 255)
+YELLOW = (255, 255, 0)
 
 # Configuração da tela
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 750
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("As Aventuras de Helora e Gabrela")
+pygame.display.set_caption("A fuga de Alexandre de Morais e Peixonalta de Bangu")
 
 # Função para carregar e redimensionar imagem
 def load_image(image_path, file_name, width, height):
@@ -29,10 +31,10 @@ def load_image(image_path, file_name, width, height):
 
 current_path = os.path.dirname(__file__)
 image_path = os.path.abspath(os.path.join(current_path, '..', 'assets'))
-louriskelly_img = load_image(image_path, 'helora.png', 64, 64)
-gabikkk_img = load_image(image_path, 'gabi.png', 64, 64)
+alexandre_de_morais_img = load_image(image_path, 'alexandre_de_morais.png', 64, 64)
+peixonalta_img = load_image(image_path, 'peixonalta.png', 64, 64)
 
-if louriskelly_img is None or gabikkk_img is None:
+if alexandre_de_morais_img is None or peixonalta_img is None:
     print("Erro: Imagem não encontrada.")
     pygame.quit()
     exit()
@@ -97,43 +99,52 @@ class Player:
         if self.is_alive:
             screen.blit(self.image, self.rect.topleft)
 
-    def check_death(self, level):
+    def check_death(self, level, player_name):
         if 0 <= self.rect.y // 32 < len(level) and 0 <= self.rect.x // 32 < len(level[0]):
-            return level[self.rect.y // 32][self.rect.x // 32] == "T"
+            tile = level[self.rect.y // 32][self.rect.x // 32]
+            if tile == "T":
+                return True  # T mata ambos os personagens
+            elif tile == "U" and player_name == "alexandre_de_morais":
+                return True  # U mata apenas Alexandre de Morais
+            elif tile == "V" and player_name == "peixonalta":
+                return True  # V mata apenas Peixonalta
         return False
 
+
+
 # Inicialização dos personagens
-louriskelly = Player(100, 600, louriskelly_img, 64, 64)
-gabikkk = Player(200, 600, gabikkk_img, 64, 64)
+alexandre_de_morais = Player(100, 600, alexandre_de_morais_img, 64, 64)
+peixonalta = Player(200, 600, peixonalta_img, 64, 64)
 
 def load_level():
     level = [
         "##################################################",
-        "#     F                                     E    #",
-        "#                T             T                 #",
-        "#    # # #                                       #",
-        "#        # ##                        #############",
-        "#           #                      # #           #",
-        "#           #                     #  #           #",
-        "#           ##########        ####   #           #",
-        "#                      #             #           #",
-        "#        #            #  #           #           #",
-        "#        #            #              #           #",
-        "#        #            #              #           #",
-        "#        #            ##   ######### #           #",
-        "#        #            #              #           #",
-        "#        #            #              #           #",
-        "#        #   #        #              #           #",
-        "#        #   #        ###########   ##           #",
-        "#        #   #        #              #           #",
-        "#        #   ##########              #           #",
-        "#           #                #########           #",
-        "#                           #        #           #",
-        "#                        # #   #     #           #",
-        "#                        #     #     #           #",
+        "#     F                  U           E           #",
+        "#                                                #",
+        "#           #  #               #                 #",
+        "#   ####       ######                 #####      #",
+        "#        ######                      #     #     #",
+        "#    #       V                       # U         #",
+        "#           #     ########           #           #",
+        "#           #    ##      ##        # #           #",
+        "#   ###         ##        ##    ####             #",
+        "#    T          #          #        ###          #",
+        "#         #     #          #       #   #         #",
+        "#        ###    #    #######       # T #         #",
+        "#               ######             ###           #",
+        "#             ##        #######     #            #",
+        "#     ####    #          #         #   #####     #",
+        "#     #       #       #######          #         #",
+        "#     ####### #         #             ###   #    #",
+        "#     #       #         #         ##          ## #",
+        "#   ####       ###  #########     #             ##",
+        "#   #          #       #          #   ##  ###    #",
+        "#   ####   ##  #       ###    #   # V        ##  #",
+        "#   #      #       ##      ##      ##     ##     #",
         "##################################################"
     ]
     return level
+
 
 def draw_level(screen, level):
     obstacles = []
@@ -146,15 +157,18 @@ def draw_level(screen, level):
                 pygame.draw.rect(screen, RED, (x * 32, y * 32, 32, 32))
             elif char == "E":
                 pygame.draw.rect(screen, BLUE, (x * 32, y * 32, 32, 32))
+            elif char == "U":
+                pygame.draw.rect(screen, CIAN, (x * 32, y * 32, 32, 32))
             elif char == "T":
                 pygame.draw.rect(screen, GREEN, (x * 32, y * 32, 32, 32))
+            elif char == "V":
+                pygame.draw.rect(screen, YELLOW, (x * 32, y * 32, 32, 32))
     return obstacles
 
-def check_victory(louriskelly, gabikkk, level):
-    fireboy_victory = level[louriskelly.rect.y // 32][louriskelly.rect.x // 32] == "F"
-    watergirl_victory = level[gabikkk.rect.y // 32][gabikkk.rect.x // 32] == "E"
-    victory = fireboy_victory and watergirl_victory
-    return fireboy_victory and watergirl_victory
+def check_victory(alexandre_de_morais, peixonalta, level):
+    alexandre_de_morais_victory = level[alexandre_de_morais.rect.y // 32][alexandre_de_morais.rect.x // 32] == "F"
+    peixonalta_victory = level[peixonalta.rect.y // 32][peixonalta.rect.x // 32] == "E"
+    return alexandre_de_morais_victory and peixonalta_victory
 
 
 running = True
@@ -168,38 +182,38 @@ while running:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a]:
-        louriskelly.move(-1)
+        alexandre_de_morais.move(-1)
     if keys[pygame.K_d]:
-        louriskelly.move(1)
+        alexandre_de_morais.move(1)
     if keys[pygame.K_w]:
-        louriskelly.jump()
+        alexandre_de_morais.jump()
     if keys[pygame.K_LEFT]:
-        gabikkk.move(-1)
+        peixonalta.move(-1)
     if keys[pygame.K_RIGHT]:
-        gabikkk.move(1)
+        peixonalta.move(1)
     if keys[pygame.K_UP]:
-        gabikkk.jump()
+        peixonalta.jump()
 
     screen.fill(WHITE)
     obstacles = draw_level(screen, level)
-    louriskelly.update(obstacles)
-    gabikkk.update(obstacles)
-    louriskelly.draw(screen)
-    gabikkk.draw(screen)
+    alexandre_de_morais.update(obstacles)
+    peixonalta.update(obstacles)
+    alexandre_de_morais.draw(screen)
+    peixonalta.draw(screen)
 
-    #victory, fireboy_victory, watergirl_victory = check_victory(louriskelly, gabikkk, level)
-    if check_victory(louriskelly, gabikkk, level):
+    if check_victory(alexandre_de_morais, peixonalta, level):
         print("Vitória!")
         running = False
     else:
-        if louriskelly.check_death(level):
-            print("LourisKelly morreu!")
+        if alexandre_de_morais.check_death(level, "alexandre_de_morais"):
+            print("Alexandre de Morais morreu! kkkkkkkkkk")
             running = False
-        if gabikkk.check_death(level):
-            print("Gabikkkk morreu!")
+        if peixonalta.check_death(level, "peixonalta"):
+            print("Peixonalta morreu! kkkkkkkkkk")
             running = False
 
     pygame.display.flip()
     clock.tick(60)
+
 
 pygame.quit()
