@@ -6,19 +6,19 @@ from classes import Obstacle, Player
 pygame.init()
 
 # Define as cores utilizadas no jogo
-BLACK = (0, 0, 0)      # Cor para obstáculos
+BLACK = (0, 0, 0)       # Cor para obstáculos
 WHITE = (255, 255, 255) # Cor de fundo
-RED = (255, 0, 0)      # Cor para o ponto de vitória de Alexandre de Morais
-BLUE = (0, 0, 255)     # Cor para o ponto de vitória de Peixonalta
-GREEN = (0, 255, 0)    # Cor para o obstáculo 'T'
-CIAN = (0, 255, 255)   # Cor para o obstáculo 'U'
-YELLOW = (255, 255, 0) # Cor para o obstáculo 'V'
+RED = (255, 0, 0)       # Cor para o ponto de vitória de careca
+BLUE = (0, 0, 255)      # Cor para o ponto de vitória de Peixonalta
+GREEN = (0, 255, 0)     # Cor para o obstáculo 'T'
+CIAN = (0, 255, 255)    # Cor para o obstáculo 'U'
+YELLOW = (255, 255, 0)  # Cor para o obstáculo 'V'
 
 # Configuração da tela
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 750
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("A fuga de Alexandre de Morais e Peixonalta de Bangu")
+pygame.display.set_caption("A fuga de careca e Peixonalta de Bangu")
 
 def load_image(image_path, file_name, width, height):
     """
@@ -46,17 +46,17 @@ current_path = os.path.dirname(__file__)
 image_path = os.path.abspath(os.path.join(current_path, '..', 'assets'))
 
 # Carrega as imagens dos personagens
-alexandre_de_morais_img = load_image(image_path, 'alexandre_de_morais.png', 64, 64)
+careca_img = load_image(image_path, 'careca.png', 64, 64)
 peixonalta_img = load_image(image_path, 'peixonalta.png', 64, 64)
 
 # Verifica se as imagens foram carregadas corretamente
-if alexandre_de_morais_img is None or peixonalta_img is None:
+if careca_img is None or peixonalta_img is None:
     print("Erro: Imagem não encontrada.")
     pygame.quit()
     exit()
 
 # Inicialização dos personagens
-alexandre_de_morais = Player(100, 600, alexandre_de_morais_img, 64, 64)
+careca = Player(100, 600, careca_img, 64, 64)
 peixonalta = Player(200, 600, peixonalta_img, 64, 64)
 
 def load_level():
@@ -123,21 +123,21 @@ def draw_level(screen, level):
                 pygame.draw.rect(screen, YELLOW, (x * 32, y * 32, 32, 32))
     return obstacles
 
-def check_victory(alexandre_de_morais, peixonalta, level):
+def check_victory(careca, peixonalta, level):
     """
     Função para verificar se os personagens alcançaram seus respectivos pontos de vitória.
 
     Parâmetros:
-        alexandre_de_morais (Player): O jogador 'Alexandre de Morais'.
+        careca (Player): O jogador 'careca'.
         peixonalta (Player): O jogador 'Peixonalta'.
         level (list): O mapa do nível do jogo.
 
     Retorna:
         bool: True se ambos os jogadores chegaram aos seus pontos de vitória, caso contrário, False.
     """
-    alexandre_de_morais_victory = level[alexandre_de_morais.rect.y // 32][alexandre_de_morais.rect.x // 32] == "F"
+    careca_victory = level[careca.rect.y // 32][careca.rect.x // 32] == "F"
     peixonalta_victory = level[peixonalta.rect.y // 32][peixonalta.rect.x // 32] == "E"
-    return alexandre_de_morais_victory and peixonalta_victory
+    return careca_victory and peixonalta_victory
 
 # Loop principal do jogo
 running = True
@@ -153,11 +153,11 @@ while running:
     # Controles do jogador
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a]:
-        alexandre_de_morais.move(-1, obstacles)  # Movimento para a esquerda
+        careca.move(-1, obstacles)  # Movimento para a esquerda
     if keys[pygame.K_d]:
-        alexandre_de_morais.move(1, obstacles)   # Movimento para a direita
+        careca.move(1, obstacles)   # Movimento para a direita
     if keys[pygame.K_w]:
-        alexandre_de_morais.jump()               # Pulo de Alexandre de Morais
+        careca.jump()               # Pulo de careca
     if keys[pygame.K_LEFT]:
         peixonalta.move(-1, obstacles)           # Movimento para a esquerda
     if keys[pygame.K_RIGHT]:
@@ -168,18 +168,18 @@ while running:
     # Atualiza a tela
     screen.fill(WHITE)
     obstacles = draw_level(screen, level)
-    alexandre_de_morais.update(obstacles)
+    careca.update(obstacles)
     peixonalta.update(obstacles)
-    alexandre_de_morais.draw(screen)
+    careca.draw(screen)
     peixonalta.draw(screen)
 
     # Verifica vitória ou morte
-    if check_victory(alexandre_de_morais, peixonalta, level):
+    if check_victory(careca, peixonalta, level):
         print("Vitória!")
         running = False
     else:
-        if alexandre_de_morais.check_death(level, "alexandre_de_morais"):
-            print("Alexandre de Morais morreu! kkkkkkkkkk")
+        if careca.check_death(level, "careca"):
+            print("careca morreu! kkkkkkkkkk")
             running = False
         if peixonalta.check_death(level, "peixonalta"):
             print("Peixonalta morreu! kkkkkkkkkk")
