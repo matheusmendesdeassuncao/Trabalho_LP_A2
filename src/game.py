@@ -1,6 +1,6 @@
 import pygame
 import os
-from classes import Obstacle, Player 
+from classes import Obstacle, Player, Inimigo, InimigoPeixonalta, InimigoCareca
 
 # Inicializa o Pygame
 pygame.init()
@@ -45,9 +45,12 @@ def load_image(image_path, file_name, width, height):
 current_path = os.path.dirname(__file__)
 image_path = os.path.abspath(os.path.join(current_path, '..', 'assets'))
 
-# Carrega as imagens dos personagens
+# Carrega as imagens dos personagens e dos inimigos
 careca_img = load_image(image_path, 'careca.png', 64, 64)
 peixonalta_img = load_image(image_path, 'peixonalta.png', 64, 64)
+inimigo_img = load_image(image_path, 'inimigo.png', 64, 64)
+inimigo_peixonalta_img = load_image(image_path, 'inimigo_peixonalta.png', 64, 64)
+inimigo_careca_img = load_image(image_path, 'inimigo_careca.png', 64, 64)
 
 # Verifica se as imagens foram carregadas corretamente
 if careca_img is None or peixonalta_img is None:
@@ -59,6 +62,12 @@ if careca_img is None or peixonalta_img is None:
 careca = Player(100, 600, careca_img, 64, 64)
 peixonalta = Player(200, 600, peixonalta_img, 64, 64)
 
+# Inicializa os inimigos
+inimigos = [
+    Inimigo(1000, 250, inimigo_img, 64, 64),  # Inimigo genérico que persegue ambos os personagens
+    InimigoPeixonalta(1400, 100, inimigo_peixonalta_img, 64, 64),  # Inimigo que persegue apenas Peixonalta
+    InimigoCareca(800, 500, inimigo_careca_img, 64, 64)  # Inimigo que persegue apenas Careca
+]
 def load_level():
     """
     Função que define o layout do nível do jogo.
@@ -70,22 +79,22 @@ def load_level():
         "##################################################",
         "#     F                  U           E           #",
         "#                                                #",
-        "#           #  #               #                 #",
+        "#           #  #                                 #",
         "#   ####       ######                 #####      #",
-        "#        ######                      #     #     #",
-        "#    #       V                       # U         #",
+        "#        ######                      #           #",
+        "#            V                       # U         #",
         "#           #     ########           #           #",
         "#           #    ##      ##        # #           #",
-        "#   ###         ##        ##    ####             #",
+        "#   ###         ##        ##                     #",
         "#    T          #          #        ###          #",
         "#         #     #          #       #   #         #",
         "#        ###    #    #######       # T #         #",
         "#               ######             ###           #",
-        "#             ##        #######     #            #",
-        "#     ####    #          #         #   #####     #",
-        "#     #       #       #######          #         #",
-        "#     ####### #         #             ###   #    #",
-        "#     #       #         #         ##          ## #",
+        "#                                   #            #",
+        "#     ####                         #   #####     #",
+        "#     #       #                        #         #",
+        "#     ####### #                       ###   #    #",
+        "#     #       #                   ##          ## #",
         "#   ####       ###  #########     #             ##",
         "#   #          #       #          #   ##  ###    #",
         "#   ####   ##  #       ###    #   # V        ##  #",
@@ -173,17 +182,34 @@ while running:
     careca.draw(screen)
     peixonalta.draw(screen)
 
-    # Verifica vitória ou morte
-    if check_victory(careca, peixonalta, level):
-        print("Vitória!")
-        running = False
-    else:
-        if careca.check_death(level, "careca"):
-            print("careca morreu! kkkkkkkkkk")
+# Atualiza e desenha inimigos
+    for inimigo in inimigos:
+        inimigo.update(careca, peixonalta, obstacles)  # Atualiza posição e movimento
+        inimigo.draw(screen)  # Desenha inimigo na tela
+
+        # Verifica colisão entre inimigos e personagens
+        if isinstance(inimigo, InimigoCareca) and inimigo.rect.colliderect(careca.rect):
+            print("Careca foi pego pelo inimigo!")
             running = False
-        if peixonalta.check_death(level, "peixonalta"):
-            print("Peixonalta morreu! kkkkkkkkkk")
+        elif isinstance(inimigo, InimigoPeixonalta) and inimigo.rect.colliderect(peixonalta.rect):
+            print("Peixonalta foi pego pelo inimigo!")
             running = False
+        # Verifica se o inimigo é comum e pode matar qualquer um dos dois personagens
+        elif not isinstance(inimigo, (InimigoCareca, InimigoPeixonalta)):
+            if inimigo.rect.colliderect(careca.rect):
+                print("Careca foi pego pelo inimigo comum!")
+                running = False
+            elif inimigo.rect.colliderect(peixonalta.rect):
+                print("Peixonalta foi pego pelo inimigo comum!")
+                running = False
+
+        else:
+            if careca.check_death(level, "careca"):
+                print("careca morreu! kkkkkkkkkk")
+                running = False
+            if peixonalta.check_death(level, "peixonalta"):
+                print("Peixonalta morreu! kkkkkkkkkk")
+                running = False
 
     # Atualiza a tela a cada frame
     pygame.display.flip()

@@ -1,4 +1,6 @@
 import pygame
+import random
+from math import sqrt
 
 # Classe que representa um obstáculo no jogo
 class Obstacle:
@@ -144,3 +146,121 @@ class Player:
             elif tile == "V" and player_name == "peixonalta":
                 return True  # "V" mata apenas Peixonalta
         return False  # Retorna False se o jogador não morreu
+
+
+import pygame
+import math
+
+import pygame
+import math
+
+class Inimigo(pygame.sprite.Sprite):
+    def __init__(self, x, y, image, width, height):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.width = width
+        self.height = height
+        self.velocidade_y = 0
+        self.aceleracao_gravidade = 0.5
+        self.salto = -10
+        self.no_chao = False
+        self.speed = 0
+        self.pode_mover = False
+        self.deteccao_distancia = 200  # Raio de detecção
+
+    def move(self, obstacles):
+        if self.pode_mover:
+            self.rect.x += self.speed
+            for obstacle in obstacles:
+                if self.rect.colliderect(obstacle.rect):
+                    if self.speed > 0:
+                        self.rect.right = obstacle.rect.left
+                    elif self.speed < 0:
+                        self.rect.left = obstacle.rect.right
+
+    def gravidade(self, obstacles):
+        if not self.no_chao:
+            self.velocidade_y += self.aceleracao_gravidade
+            self.rect.y += self.velocidade_y
+            self.no_chao = False
+            for obstacle in obstacles:
+                if self.rect.colliderect(obstacle.rect) and self.velocidade_y > 0:
+                    self.rect.bottom = obstacle.rect.top
+                    self.velocidade_y = 0
+                    self.no_chao = True
+
+    def pular(self):
+        if self.no_chao:
+            self.velocidade_y = self.salto
+            self.no_chao = False
+
+    def update(self, careca, peixonalta, obstacles):
+        distancia_careca = math.sqrt((self.rect.x - careca.rect.x) ** 2 + (self.rect.y - careca.rect.y) ** 2)
+        distancia_peixonalta = math.sqrt((self.rect.x - peixonalta.rect.x) ** 2 + (self.rect.y - peixonalta.rect.y) ** 2)
+
+        # Verifica se o inimigo deve perseguir o Careca ou o Peixonalta
+        if distancia_careca <= self.deteccao_distancia:
+            self.pode_mover = True
+            if self.rect.x < careca.rect.x:
+                self.speed = 2
+            elif self.rect.x > careca.rect.x:
+                self.speed = -2
+        elif distancia_peixonalta <= self.deteccao_distancia:
+            self.pode_mover = True
+            if self.rect.x < peixonalta.rect.x:
+                self.speed = 2
+            elif self.rect.x > peixonalta.rect.x:
+                self.speed = -2
+        else:
+            self.pode_mover = False
+
+        for obstacle in obstacles:
+            if self.rect.colliderect(obstacle.rect) and self.no_chao:
+                self.pular()
+
+        self.gravidade(obstacles)
+        self.move(obstacles)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+    def verificar_morte(self, careca, peixonalta):
+        """Verifica se o inimigo matou o personagem correto"""
+        # Inimigo exclusivo do Careca
+        if isinstance(self, InimigoCareca):
+            if self.rect.colliderect(careca.rect):
+                careca.morrer()  # O Careca morre
+        # Inimigo exclusivo do Peixonalta
+        elif isinstance(self, InimigoPeixonalta):
+            if self.rect.colliderect(peixonalta.rect):
+                peixonalta.morrer()  # O Peixonalta morre
+
+# Subclasse do Inimigo que persegue o Careca
+class InimigoCareca(Inimigo):
+    def __init__(self, x, y, image, width, height):
+        super().__init__(x, y, image, width, height)
+
+    def update(self, careca, peixonalta, obstacles):
+        super().update(careca, peixonalta, obstacles)
+
+    def verificar_morte(self, careca):
+        if self.rect.colliderect(careca.rect):
+            careca.morrer()  # Mata o Careca quando colide
+
+# Subclasse do Inimigo que persegue o Peixonalta
+class InimigoPeixonalta(Inimigo):
+    def __init__(self, x, y, image, width, height):
+        super().__init__(x, y, image, width, height)
+
+    def update(self, careca, peixonalta, obstacles):
+        super().update(careca, peixonalta, obstacles)
+
+    def verificar_morte(self, peixonalta):
+        if self.rect.colliderect(peixonalta.rect):
+            peixonalta.morrer()  # Mata o Peixonalta quando colide
+
+
+
