@@ -141,7 +141,7 @@ class Player:
             tile = level[self.rect.y // 32][self.rect.x // 32]  # Pega o tipo de tile no nível
             if tile == "T":
                 return True  # "T" mata ambos os personagens
-            elif tile == "U" and player_name == "alexandre_de_morais":
+            elif tile == "U" and player_name == "careca":
                 return True  # "U" mata apenas Alexandre de Morais
             elif tile == "V" and player_name == "peixonalta":
                 return True  # "V" mata apenas Peixonalta

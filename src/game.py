@@ -77,9 +77,9 @@ def load_level():
     """
     level = [
         "##################################################",
-        "#     F                  U           E           #",
-        "#                                                #",
-        "#           #  #                                 #",
+        "#     F                  U              E        #",
+        "#     F                                 E        #",
+        "#            #  #                                #",
         "#   ####       ######                 #####      #",
         "#        ######                      #           #",
         "#            V                       # U         #",
@@ -182,6 +182,13 @@ while running:
     careca.draw(screen)
     peixonalta.draw(screen)
 
+    if check_victory(careca, peixonalta, level):
+        print("Vitória!")
+        running = False
+    else:
+        if careca.check_death(level, "careca"):
+            print("careca morreu! kkkkkkkkkk")
+
 # Atualiza e desenha inimigos
     for inimigo in inimigos:
         inimigo.update(careca, peixonalta, obstacles)  # Atualiza posição e movimento
@@ -189,18 +196,18 @@ while running:
 
         # Verifica colisão entre inimigos e personagens
         if isinstance(inimigo, InimigoCareca) and inimigo.rect.colliderect(careca.rect):
-            print("Careca foi pego pelo inimigo!")
+            print("Careca foi pego pela cobra")
             running = False
         elif isinstance(inimigo, InimigoPeixonalta) and inimigo.rect.colliderect(peixonalta.rect):
-            print("Peixonalta foi pego pelo inimigo!")
+            print("Peixonalta foi pego pelo gato")
             running = False
         # Verifica se o inimigo é comum e pode matar qualquer um dos dois personagens
         elif not isinstance(inimigo, (InimigoCareca, InimigoPeixonalta)):
             if inimigo.rect.colliderect(careca.rect):
-                print("Careca foi pego pelo inimigo comum!")
+                print("Careca foi pego pelo guarda")
                 running = False
             elif inimigo.rect.colliderect(peixonalta.rect):
-                print("Peixonalta foi pego pelo inimigo comum!")
+                print("Peixonalta foi pego pelo guarda")
                 running = False
 
         else:
