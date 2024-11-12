@@ -1,6 +1,6 @@
 import pygame
 import random
-from math import sqrt
+import math
 
 # Classe que representa um obstáculo no jogo
 class Obstacle:
@@ -147,13 +147,6 @@ class Player:
                 return True  # "V" mata apenas Peixonalta
         return False  # Retorna False se o jogador não morreu
 
-
-import pygame
-import math
-
-import pygame
-import math
-
 class Inimigo(pygame.sprite.Sprite):
     def __init__(self, x, y, image, width, height):
         super().__init__()
@@ -165,21 +158,25 @@ class Inimigo(pygame.sprite.Sprite):
         self.height = height
         self.velocidade_y = 0
         self.aceleracao_gravidade = 0.5
-        self.salto = -10
+        self.salto = -15
         self.no_chao = False
         self.speed = 0
         self.pode_mover = False
-        self.deteccao_distancia = 200  # Raio de detecção
+        self.deteccao_distancia = 250
 
     def move(self, obstacles):
         if self.pode_mover:
             self.rect.x += self.speed
+            colidiu = False
             for obstacle in obstacles:
                 if self.rect.colliderect(obstacle.rect):
+                    colidiu = True
                     if self.speed > 0:
                         self.rect.right = obstacle.rect.left
                     elif self.speed < 0:
                         self.rect.left = obstacle.rect.right
+            return colidiu
+        return False
 
     def gravidade(self, obstacles):
         if not self.no_chao:
@@ -187,10 +184,14 @@ class Inimigo(pygame.sprite.Sprite):
             self.rect.y += self.velocidade_y
             self.no_chao = False
             for obstacle in obstacles:
-                if self.rect.colliderect(obstacle.rect) and self.velocidade_y > 0:
-                    self.rect.bottom = obstacle.rect.top
-                    self.velocidade_y = 0
-                    self.no_chao = True
+                if self.rect.colliderect(obstacle.rect):
+                    if self.velocidade_y > 0:
+                        self.rect.bottom = obstacle.rect.top
+                        self.velocidade_y = 0
+                        self.no_chao = True
+                    elif self.velocidade_y < 0:
+                        self.rect.top = obstacle.rect.bottom
+                        self.velocidade_y = 0
 
     def pular(self):
         if self.no_chao:
@@ -201,42 +202,37 @@ class Inimigo(pygame.sprite.Sprite):
         distancia_careca = math.sqrt((self.rect.x - careca.rect.x) ** 2 + (self.rect.y - careca.rect.y) ** 2)
         distancia_peixonalta = math.sqrt((self.rect.x - peixonalta.rect.x) ** 2 + (self.rect.y - peixonalta.rect.y) ** 2)
 
-        # Verifica se o inimigo deve perseguir o Careca ou o Peixonalta
         if distancia_careca <= self.deteccao_distancia:
-            self.pode_mover = True
-            if self.rect.x < careca.rect.x:
-                self.speed = 2
-            elif self.rect.x > careca.rect.x:
-                self.speed = -2
+            alvo = careca
         elif distancia_peixonalta <= self.deteccao_distancia:
-            self.pode_mover = True
-            if self.rect.x < peixonalta.rect.x:
-                self.speed = 2
-            elif self.rect.x > peixonalta.rect.x:
-                self.speed = -2
+            alvo = peixonalta
         else:
+            alvo = None
             self.pode_mover = False
+            self.speed = 0
 
-        for obstacle in obstacles:
-            if self.rect.colliderect(obstacle.rect) and self.no_chao:
+        if alvo:
+            self.pode_mover = True
+            if self.rect.x < alvo.rect.x:
+                self.speed = 2
+            elif self.rect.x > alvo.rect.x:
+                self.speed = -2
+
+            colidiu = self.move(obstacles)
+
+            if colidiu and self.rect.y > alvo.rect.y:
                 self.pular()
 
         self.gravidade(obstacles)
-        self.move(obstacles)
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
     def verificar_morte(self, careca, peixonalta):
-        """Verifica se o inimigo matou o personagem correto"""
-        # Inimigo exclusivo do Careca
-        if isinstance(self, InimigoCareca):
-            if self.rect.colliderect(careca.rect):
-                careca.morrer()  # O Careca morre
-        # Inimigo exclusivo do Peixonalta
-        elif isinstance(self, InimigoPeixonalta):
-            if self.rect.colliderect(peixonalta.rect):
-                peixonalta.morrer()  # O Peixonalta morre
+        if isinstance(self, InimigoCareca) and self.rect.colliderect(careca.rect):
+            careca.morrer()
+        elif isinstance(self, InimigoPeixonalta) and self.rect.colliderect(peixonalta.rect):
+            peixonalta.morrer()
 
 # Subclasse do Inimigo que persegue o Careca
 class InimigoCareca(Inimigo):
