@@ -1,15 +1,23 @@
 import pygame
 
 class Button:
-    def __init__(self, x, y, width, height, text='', font_size=30, color=(0,0,0), text_color=(255,255,255)):
+    def __init__(self, x, y, width, height, text='', font_size=30, color=(0,0,0), text_color=(255,255,255), selected_color=(255,192,203)):
         self.rect = pygame.Rect(x,y,width,height)
-        self.color = color
+        self.color = color 
+        self.selected_color = selected_color
         self.text = text
         self.text_color= text_color
         self.font = pygame.font.Font(None, font_size)
+        self.is_selected = False
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
+
+        #altera a cor do botao enquanto ele esta selecionado
+        self.is_selected = self.rect.collidepoint(pygame.mouse.get_pos())
+        if self.is_selected: 
+            pygame.draw.rect(screen, self.selected_color, self.rect)
+        else:
+            pygame.draw.rect(screen, self.color, self.rect)
 
         #cria as caracteristicas do texto
         if self.text:
