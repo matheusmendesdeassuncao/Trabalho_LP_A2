@@ -1,7 +1,7 @@
 import pygame
 
 class Button:
-    def __init__(self, x, y, width, height, text='', font_size=30, color=(255,215,0), text_color=(0,0,0), selected_color=(255,0,0)):
+    def __init__(self, x, y, width, height, text='', font_size=30, color=(255,215,0), text_color=(0,0,0), selected_color=(238,173,45)):
         self.rect = pygame.Rect(x,y,width,height)
         self.color = color 
         self.selected_color = selected_color
