@@ -48,9 +48,9 @@ image_path = os.path.abspath(os.path.join(current_path, '..', 'assets'))
 # Carrega as imagens dos personagens e dos inimigos e das chaves
 careca_img = load_image(image_path, 'players/careca_final.png', 64, 64)
 peixonalta_img = load_image(image_path, 'players/peixonauta_final.png', 48, 32)
-inimigo_img = load_image(image_path, 'enimies/inimigo.png', 64, 64)
-inimigo_peixonalta_img = load_image(image_path, 'enimies/inimigo_peixonalta.png', 64, 32)
-inimigo_careca_img = load_image(image_path, 'enimies/careca/cobra_l.png', 64, 32)
+inimigo_img = load_image(image_path, 'enimies/inimigo.png', 424, 37)
+inimigo_peixonalta_img = load_image(image_path, 'enimies/inimigo_peixonalta.png', 424, 37)
+inimigo_careca_img = load_image(image_path, 'enimies/careca/cobra.png', 424, 37)
 
 chave_sprites = []
 for i in range(1, 9):
@@ -77,7 +77,7 @@ peixonalta = Player(200, 600, peixonalta_img, 64, 64)
 inimigos = [
     Inimigo(1000, 250, inimigo_img, 64, 64),  # Inimigo genérico que persegue ambos os personagens
     InimigoPeixonalta(1400, 100, inimigo_peixonalta_img, 64, 64),  # Inimigo que persegue apenas Peixonalta
-    InimigoCareca(800, 500, inimigo_careca_img, 64, 64)  # Inimigo que persegue apenas Careca
+    InimigoCareca(800, 550, inimigo_careca_img, 64, 64)  # Inimigo que persegue apenas Careca
 ]
 def load_level():
     """

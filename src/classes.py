@@ -166,10 +166,24 @@ class Inimigo(pygame.sprite.Sprite):
             height (int): A altura do Inimigo.
         """
         super().__init__()
+        pygame.sprite.Sprite.__init__(self)
+
         self.image = image
+        #self.img_right = img_rigth
+
+        self.imagens_cobra = []
+        for i in range(4):
+            img = self.image.subsurface((i*53,0), (53, 37))
+            self.imagens_cobra.append(img)
+
+        self.index_lista = 0
+        self.image = self.imagens_cobra[self.index_lista]
+
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        #self.rect.center = (x, y)
+
         self.width = width
         self.height = height
         self.velocidade_y = 0
@@ -298,7 +312,7 @@ class Inimigo(pygame.sprite.Sprite):
 
 
 class InimigoCareca(Inimigo):
-    def __init__(self, x, y, image, width, height):
+    def __init__(self, x, y, img_left, width, height):
         """
         Inicializa um Inimigo especializado em perseguir o Careca.
 
@@ -309,7 +323,8 @@ class InimigoCareca(Inimigo):
             width (int): A largura do Inimigo.
             height (int): A altura do Inimigo.
         """
-        super().__init__(x, y, image, width, height)
+        super().__init__(x, y, img_left, width, height)
+        self.img_left = img_left
 
     def update(self, careca, peixonalta, obstacles):
         """
@@ -321,6 +336,10 @@ class InimigoCareca(Inimigo):
             obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
         """
         super().update(careca, peixonalta, obstacles)
+        if self.index_lista > 3:
+            self.index_lista = 0
+        self.index_lista += 0.1
+        self.image = self.imagens_cobra[int(self.index_lista)]
 
     def verificar_morte(self, careca):
         """
@@ -334,7 +353,7 @@ class InimigoCareca(Inimigo):
 
 
 class InimigoPeixonalta(Inimigo):
-    def __init__(self, x, y, image, width, height):
+    def __init__(self, x, y, img_left, width, height):
         """
         Inicializa um Inimigo especializado em perseguir o Peixonalta.
 
@@ -345,7 +364,7 @@ class InimigoPeixonalta(Inimigo):
             width (int): A largura do Inimigo.
             height (int): A altura do Inimigo.
         """
-        super().__init__(x, y, image, width, height)
+        super().__init__(x, y, img_left, width, height)
 
     def update(self, careca, peixonalta, obstacles):
         """
