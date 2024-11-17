@@ -154,7 +154,7 @@ class Player:
         return False  # Retorna False se o Player não morreu
 
 class Inimigo(pygame.sprite.Sprite):
-    def __init__(self, x, y, image, width, height):
+    def __init__(self, x, y, image, width, height, num):
         """
         Inicializa um novo inimigo com a posição (x, y), imagem, largura e altura fornecidos.
 
@@ -171,13 +171,25 @@ class Inimigo(pygame.sprite.Sprite):
         self.image = image
         #self.img_right = img_rigth
 
-        self.imagens_cobra = []
-        for i in range(4):
-            img = self.image.subsurface((i*53,0), (53, 37))
-            self.imagens_cobra.append(img)
+        self.num = num
+        self.sprite_sheet = []
+        if num == 1:
+            for i in range(4):
+                img = self.image.subsurface((i*53,0), (53, 37))
+                self.sprite_sheet.append(img)
+        elif num == 2:
+            for i in range(2):
+                img = self.image.subsurface((i*64,0), (64, 64))
+                self.sprite_sheet.append(img)
+        elif num == 3:
+            for i in range(7):
+                img = self.image.subsurface((i*12,0), (12, 30))
+                self.sprite_sheet.append(img)
+        
+        print(self.sprite_sheet)
 
         self.index_lista = 0
-        self.image = self.imagens_cobra[self.index_lista]
+        self.image = self.sprite_sheet[self.index_lista]
 
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -310,9 +322,8 @@ class Inimigo(pygame.sprite.Sprite):
         elif isinstance(self, InimigoPeixonalta) and self.rect.colliderect(peixonalta.rect):
             peixonalta.morrer()
 
-
-class InimigoCareca(Inimigo):
-    def __init__(self, x, y, img_left, width, height):
+class Policial(Inimigo):
+    def __init__(self, x, y, image, width, height, num = 3):
         """
         Inicializa um Inimigo especializado em perseguir o Careca.
 
@@ -323,8 +334,7 @@ class InimigoCareca(Inimigo):
             width (int): A largura do Inimigo.
             height (int): A altura do Inimigo.
         """
-        super().__init__(x, y, img_left, width, height)
-        self.img_left = img_left
+        super().__init__(x, y, image, width, height, num)
 
     def update(self, careca, peixonalta, obstacles):
         """
@@ -336,11 +346,44 @@ class InimigoCareca(Inimigo):
             obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
         """
         super().update(careca, peixonalta, obstacles)
-        if self.index_lista > 3:
+        if self.index_lista > 7:
             self.index_lista = 0
         self.index_lista += 0.1
-        self.image = self.imagens_cobra[int(self.index_lista)]
+        self.image = self.sprite_sheet[int(self.index_lista)]
 
+    def verificar_morte(self, careca, peixonalta):
+        super().verificar_morte(careca, peixonalta)
+
+class InimigoCareca(Inimigo):
+    def __init__(self, x, y, image, width, height, num = 1):
+        """
+        Inicializa um Inimigo especializado em perseguir o Careca.
+
+        Args:
+            x (int): A posição horizontal inicial do Inimigo.
+            y (int): A posição vertical inicial do Inimigo.
+            image: A imagem do Inimigo.
+            width (int): A largura do Inimigo.
+            height (int): A altura do Inimigo.
+        """
+        super().__init__(x, y, image, width, height, num)
+        #self.img_left = img_left
+
+    def update(self, careca, peixonalta, obstacles):
+        """
+        Atualiza o comportamento do InimigoCareca, buscando o Careca.
+
+        Args:
+            careca (Player): O jogador Careca.
+            peixonalta (Player): O jogador Peixonalta.
+            obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
+        """
+        super().update(careca, peixonalta, obstacles)
+        if self.index_lista > 4:
+            self.index_lista = 0
+        self.index_lista += 0.1
+        self.image = self.sprite_sheet[int(self.index_lista)]
+    
     def verificar_morte(self, careca):
         """
         Verifica se o InimigoCareca colidiu com o Careca, matando-o.
@@ -351,9 +394,8 @@ class InimigoCareca(Inimigo):
         if self.rect.colliderect(careca.rect):
             careca.morrer()
 
-
 class InimigoPeixonalta(Inimigo):
-    def __init__(self, x, y, img_left, width, height):
+    def __init__(self, x, y, image, width, height, num = 2):
         """
         Inicializa um Inimigo especializado em perseguir o Peixonalta.
 
@@ -364,7 +406,7 @@ class InimigoPeixonalta(Inimigo):
             width (int): A largura do Inimigo.
             height (int): A altura do Inimigo.
         """
-        super().__init__(x, y, img_left, width, height)
+        super().__init__(x, y, image, width, height, num)
 
     def update(self, careca, peixonalta, obstacles):
         """
@@ -376,6 +418,10 @@ class InimigoPeixonalta(Inimigo):
             obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
         """
         super().update(careca, peixonalta, obstacles)
+        if self.index_lista > 2:
+            self.index_lista = 0
+        self.index_lista += 1
+        self.image = self.sprite_sheet[int(self.index_lista)]
 
     def verificar_morte(self, peixonalta):
         """
