@@ -1,6 +1,6 @@
 import pygame
 import os
-from classes import Obstacle, Player, Inimigo, InimigoPeixonalta, InimigoCareca, Chave
+from classes import Obstacle, Player, Policial, InimigoPeixonalta, InimigoCareca, Chave
 
 # Inicializa o Pygame
 pygame.init()
@@ -48,7 +48,7 @@ image_path = os.path.abspath(os.path.join(current_path, '..', 'assets'))
 # Carrega as imagens dos personagens e dos inimigos e das chaves
 careca_img = load_image(image_path, 'players/careca_final.png', 64, 64)
 peixonalta_img = load_image(image_path, 'players/peixonauta_final.png', 48, 32)
-inimigo_img = load_image(image_path, 'enemies/inimigo.png', 84, 30)
+inimigo_img = load_image(image_path, 'enemies/run_policial.png', 308, 60)
 inimigo_peixonalta_img = load_image(image_path, 'enemies/gato.png', 128, 64)
 inimigo_careca_img = load_image(image_path, 'enemies/cobra.png', 424, 37)
 
@@ -75,9 +75,9 @@ peixonalta = Player(200, 600, peixonalta_img, 64, 64)
 
 # Inicializa os inimigos
 inimigos = [
-    InimigoCareca(800, 550, inimigo_careca_img, 64, 64, 1),  # Inimigo que persegue apenas Careca
-    InimigoPeixonalta(1400, 100, inimigo_peixonalta_img, 64, 64, 2),  # Inimigo que persegue apenas Peixonalta
-    Inimigo(1000, 250, inimigo_img, 64, 64, 3)  # Inimigo genérico que persegue ambos os personagens
+    InimigoCareca(800, 550, inimigo_careca_img, 64, 64),  # Inimigo que persegue apenas Careca
+    InimigoPeixonalta(1400, 100, inimigo_peixonalta_img, 64, 64),  # Inimigo que persegue apenas Peixonalta
+    Policial(1000, 250, inimigo_img, 64, 64)  # Inimigo genérico que persegue ambos os personagens
 ]
 
 def load_level():
