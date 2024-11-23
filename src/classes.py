@@ -23,6 +23,48 @@ class Obstacle:
         """
         pygame.draw.rect(screen, (0, 0, 0), self.rect)  # Desenha o obstáculo em preto
 
+class Door:
+    def __init__(self, x, y, image, width, height, max_frames):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.image = image
+        self.max_frames = max_frames
+        self.animation_frame = 0
+        self.opening = False
+        self.door_frames = []
+
+        frame_width = image.get_width() // max_frames
+        for i in range(max_frames):
+            frame = image.subsurface(i*frame_width, 0, frame_width, image.get_height())
+            self.door_frames.append(frame)
+    
+    def draw(self, screen):
+        if self.opening:
+            screen.blit(self.door_frames[self.animation_frame], (self.x, self.y))
+        else:
+            screen.blit(self.door_frames[0], (self.x, self.y))
+    
+    def animate(self):
+        if self.opening and self.animation_frame < self.max_frames - 1:
+            self.animation_frame += 1
+
+    def interact(self, player, chave):
+        if player.pegou_chave and not self.opening:
+            self.opening = True
+
+    def check_victory(self, player):
+        porta_centro_x = self.x + self.width // 2
+        porta_centro_y = self.y + self.height // 2
+        tolerancia = 20
+
+        # Verifica se o jogador está dentro da área ao redor do centro da porta
+        if (porta_centro_x - tolerancia <= player.rect.centerx <= porta_centro_x + tolerancia and
+            porta_centro_y - tolerancia <= player.rect.centery <= porta_centro_y + tolerancia):
+            return True
+        return False
 
 # Classe que representa um Player no jogo
 class Player:
@@ -357,6 +399,7 @@ class InimigoCareca(Inimigo):
             height (int): A altura do Inimigo.
         """
         super().__init__(x, y, image, width, height)
+        
         self.imagens_cobra = []
         for i in range(4):
             img = self.image.subsurface((i*53,0), (53, 37))
@@ -491,3 +534,4 @@ class Chave(pygame.sprite.Sprite):
             screen (pygame.Surface): A superfície onde a chave será desenhada.
         """
         screen.blit(self.image, self.rect)
+        
