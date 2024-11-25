@@ -210,12 +210,10 @@ class Inimigo(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.image = image
-        #self.img_right = img_rigth
 
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        #self.rect.center = (x, y)
 
         self.width = width
         self.height = height
@@ -278,41 +276,6 @@ class Inimigo(pygame.sprite.Sprite):
         if self.no_chao:
             self.velocidade_y = self.salto
             self.no_chao = False
-
-    def update(self, careca, peixonalta, obstacles):
-        """
-        Atualiza o estado do Inimigo, verificando as distâncias até os personagens, se deve se mover e aplicar gravidade.
-
-        Args:
-            careca (Player): O jogador chamado Careca.
-            peixonalta (Player): O jogador chamado Peixonalta.
-            obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
-        """
-        distancia_careca = math.sqrt((self.rect.x - careca.rect.x) ** 2 + (self.rect.y - careca.rect.y) ** 2)
-        distancia_peixonalta = math.sqrt((self.rect.x - peixonalta.rect.x) ** 2 + (self.rect.y - peixonalta.rect.y) ** 2)
-
-        if distancia_careca <= self.deteccao_distancia:
-            alvo = careca
-        elif distancia_peixonalta <= self.deteccao_distancia:
-            alvo = peixonalta
-        else:
-            alvo = None
-            self.pode_mover = False
-            self.speed = 0
-
-        if alvo:
-            self.pode_mover = True
-            if self.rect.x < alvo.rect.x:
-                self.speed = 2
-            elif self.rect.x > alvo.rect.x:
-                self.speed = -2
-
-            colidiu = self.move(obstacles)
-
-            if colidiu and self.rect.y > alvo.rect.y:
-                self.pular()
-
-        self.gravidade(obstacles)
 
     def draw(self, screen):
         """
@@ -377,7 +340,32 @@ class Policial(Inimigo):
             peixonalta (Player): O jogador Peixonalta.
             obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
         """
-        super().update(careca, peixonalta, obstacles)
+        distancia_careca = math.sqrt((self.rect.x - careca.rect.x) ** 2 + (self.rect.y - careca.rect.y) ** 2)
+        distancia_peixonalta = math.sqrt((self.rect.x - peixonalta.rect.x) ** 2 + (self.rect.y - peixonalta.rect.y) ** 2)
+
+        if distancia_careca <= self.deteccao_distancia:
+            alvo = careca
+        elif distancia_peixonalta <= self.deteccao_distancia:
+            alvo = peixonalta
+        else:
+            alvo = None
+            self.pode_mover = False
+            self.speed = 0
+
+        if alvo:
+            self.pode_mover = True
+            if self.rect.x < alvo.rect.x:
+                self.speed = 2
+            elif self.rect.x > alvo.rect.x:
+                self.speed = -2
+
+            colidiu = self.move(obstacles)
+
+            if colidiu and self.rect.y > alvo.rect.y:
+                self.pular()
+
+        self.gravidade(obstacles)
+        
         if self.index_lista > 6:
             self.index_lista = 0
         self.index_lista += 0.1
@@ -427,7 +415,6 @@ class InimigoCareca(Inimigo):
             peixonalta (Player): O jogador Peixonalta.
             obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
         """
-        super().update(careca, peixonalta, obstacles)
         if self.direction == 1:
             if self.current_pos < self.end_pos:
                 self.current_pos += 1
@@ -501,7 +488,6 @@ class InimigoPeixonalta(Inimigo):
             peixonalta (Player): O jogador Peixonalta.
             obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
         """
-        super().update(careca, peixonalta, obstacles)
         if self.direction == 1:
             if self.current_pos < self.end_pos:
                 self.current_pos += 1

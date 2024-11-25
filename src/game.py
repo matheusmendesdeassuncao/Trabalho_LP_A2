@@ -39,8 +39,8 @@ peixonalta = Player(200, 600, peixonalta_img, 64, 64)
 
 # Inicializa os inimigos
 inimigos = [
-    InimigoCareca(800, 630, inimigo_careca_img, 64, 64),  # Inimigo que persegue apenas Careca
-    InimigoPeixonalta(1700, 500, inimigo_peixonalta_img, 64, 64),  # Inimigo que persegue apenas Peixonalta
+    InimigoCareca(800, 570, inimigo_careca_img, 64, 64),  # Inimigo que persegue apenas Careca
+    InimigoPeixonalta(1700, 415, inimigo_peixonalta_img, 64, 64),  # Inimigo que persegue apenas Peixonalta
     Policial(1000, 250, inimigo_img, 64, 64)  # Inimigo genérico que persegue ambos os personagens
 ]
 
