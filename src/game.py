@@ -12,8 +12,8 @@ door_opening_width = 0
 # Carrega as imagens dos personagens e dos inimigos e das chaves
 careca_img = load_image(IMAGE_PATH, 'players/careca_final.png', 64, 64)
 peixonalta_img = load_image(IMAGE_PATH, 'players/peixonauta_final.png', 48, 32)
-inimigo_img = load_image(IMAGE_PATH, 'enemies/run_policial.png', 308, 60)
-inimigo_peixonalta_img = load_image(IMAGE_PATH, 'enemies/gato.png', 128, 64)
+inimigo_img = load_image(IMAGE_PATH, 'enemies/idle_policial.png', 196, 70)
+inimigo_peixonalta_img = load_image(IMAGE_PATH, 'enemies/gato.png', 256, 64)
 inimigo_careca_img = load_image(IMAGE_PATH, 'enemies/cobra.png', 424, 37)
 
 porta_careca_img = load_image(IMAGE_PATH, 'doors/porta_careca_opening.png', 396, 57)
@@ -39,8 +39,8 @@ peixonalta = Player(200, 600, peixonalta_img, 64, 64)
 
 # Inicializa os inimigos
 inimigos = [
-    InimigoCareca(800, 550, inimigo_careca_img, 64, 64),  # Inimigo que persegue apenas Careca
-    InimigoPeixonalta(1400, 100, inimigo_peixonalta_img, 64, 64),  # Inimigo que persegue apenas Peixonalta
+    InimigoCareca(800, 630, inimigo_careca_img, 64, 64),  # Inimigo que persegue apenas Careca
+    InimigoPeixonalta(1700, 500, inimigo_peixonalta_img, 64, 64),  # Inimigo que persegue apenas Peixonalta
     Policial(1000, 250, inimigo_img, 64, 64)  # Inimigo genérico que persegue ambos os personagens
 ]
 

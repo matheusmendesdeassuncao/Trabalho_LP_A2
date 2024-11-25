@@ -358,7 +358,7 @@ class Policial(Inimigo):
         super().__init__(x, y, image, width, height)
         self.imagens_cobra = []
         for i in range(7):
-            img = self.image.subsurface((i*44,0), (44, 60))
+            img = self.image.subsurface((i*28,0), (28, 70))
             self.imagens_cobra.append(img)
 
         self.index_lista = 0
@@ -399,18 +399,24 @@ class InimigoCareca(Inimigo):
             height (int): A altura do Inimigo.
         """
         super().__init__(x, y, image, width, height)
-        
-        self.imagens_cobra = []
+        self.start_pos = 675
+        self.end_pos = 850
+        self.current_pos = self.start_pos
+        self.direction = 1
+
+        self.left_frames = []
+        self.rigth_frames = []
+
         for i in range(4):
-            img = self.image.subsurface((i*53,0), (53, 37))
-            self.imagens_cobra.append(img)
+            left_frame = self.image.subsurface((i*53, 0), (53, 37))
+            self.left_frames.append(left_frame)
+            rigth_frame = self.image.subsurface((i*53+212, 0), (53, 37))
+            self.rigth_frames.append(rigth_frame)
 
         self.index_lista = 0
-        self.image = self.imagens_cobra[self.index_lista]
 
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.fps = 10
+        self.frame_time = 0
 
     def update(self, careca, peixonalta, obstacles):
         """
@@ -422,11 +428,28 @@ class InimigoCareca(Inimigo):
             obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
         """
         super().update(careca, peixonalta, obstacles)
-        if self.index_lista > 3:
-            self.index_lista = 0
-        self.index_lista += 0.1
-        self.image = self.imagens_cobra[int(self.index_lista)]
-    
+        if self.direction == 1:
+            if self.current_pos < self.end_pos:
+                self.current_pos += 1
+            else:
+                self.direction = -1
+        else:
+            if self.current_pos > self.start_pos:
+                self.current_pos -= 1
+            else:
+                self.direction = 1
+
+        self.rect.x = self.current_pos
+
+        self.frame_time += 1
+        if self.frame_time >= self.fps:
+            self.frame_time = 0
+            self.index_lista += 1
+            if self.direction == 1:
+                self.image = self.rigth_frames[self.index_lista % 4]
+            else:
+                self.image = self.left_frames[self.index_lista % 4]
+
     def verificar_morte(self, careca):
         """
         Verifica se o InimigoCareca colidiu com o Careca, matando-o.
@@ -450,17 +473,24 @@ class InimigoPeixonalta(Inimigo):
             height (int): A altura do Inimigo.
         """
         super().__init__(x, y, image, width, height)
-        self.imagens_cobra = []
+        self.start_pos = 1250
+        self.end_pos = 1400
+        self.current_pos = self.start_pos
+        self.direction = 1
+
+        self.left_frames = []
+        self.rigth_frames = []
+
         for i in range(2):
-            img = self.image.subsurface((i*64,0), (64, 64))
-            self.imagens_cobra.append(img)
+            left_frame = self.image.subsurface((i*64, 0), (64, 64))
+            self.left_frames.append(left_frame)
+            rigth_frame = self.image.subsurface((i*64+128, 0), (64, 64))
+            self.rigth_frames.append(rigth_frame)
 
         self.index_lista = 0
-        self.image = self.imagens_cobra[self.index_lista]
 
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.fps = 10
+        self.frame_time = 0
 
     def update(self, careca, peixonalta, obstacles):
         """
@@ -472,10 +502,27 @@ class InimigoPeixonalta(Inimigo):
             obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
         """
         super().update(careca, peixonalta, obstacles)
-        if self.index_lista > 1:
-            self.index_lista = 0
-        self.index_lista += 0.1
-        self.image = self.imagens_cobra[int(self.index_lista)]
+        if self.direction == 1:
+            if self.current_pos < self.end_pos:
+                self.current_pos += 1
+            else:
+                self.direction = -1
+        else:
+            if self.current_pos > self.start_pos:
+                self.current_pos -= 1
+            else:
+                self.direction = 1
+
+        self.rect.x = self.current_pos
+
+        self.frame_time += 1
+        if self.frame_time >= self.fps:
+            self.frame_time = 0
+            self.index_lista += 1
+            if self.direction == 1:
+                self.image = self.rigth_frames[self.index_lista % 2]
+            else:
+                self.image = self.left_frames[self.index_lista % 2]
 
     def verificar_morte(self, peixonalta):
         """
