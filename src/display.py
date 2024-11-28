@@ -1,10 +1,12 @@
 import pygame
 from button import Button
+from music import Music
 
 class Display:
     def __init__(self, screen):
         self.screen = screen
         self.active_screen = "menu"
+        self.music = Music()
 
         self.init_menu()
         self.init_credits()
@@ -21,6 +23,8 @@ class Display:
             "quit": Button(300, 450, 200, 50, text="Quit")
         }
 
+        self.music.play_music()
+
     #inicializa elementos da tela credits
     def init_credits(self):
         #carrega a imagem e ajusta o tamanho
@@ -31,6 +35,8 @@ class Display:
         self.credits_buttons = {
             "back": Button(30, 530, 200, 50, text="Back")
         }
+
+        self.music.play_music()
 
     #desenha a tela menu
     def menu_screen(self):
