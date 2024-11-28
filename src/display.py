@@ -23,7 +23,7 @@ class Display:
             "quit": Button(300, 450, 200, 50, text="Quit")
         }
 
-        self.music.play_music()
+        self.music.play_music_menu()
 
     #inicializa elementos da tela credits
     def init_credits(self):
@@ -35,8 +35,6 @@ class Display:
         self.credits_buttons = {
             "back": Button(30, 530, 200, 50, text="Back")
         }
-
-        self.music.play_music()
 
     #desenha a tela menu
     def menu_screen(self):
@@ -83,8 +81,10 @@ class Display:
         if self.active_screen == "menu":
             if self.menu_buttons["play"].is_clicked(event):
                 self.active_screen = "game"
+                self.music.play_music_game() 
             elif self.menu_buttons["credits"].is_clicked(event):
                 self.active_screen = "credits"
+                self.music.play_music_game()
             elif self.menu_buttons["quit"].is_clicked(event):
                 pygame.quit()
                 quit()
@@ -92,6 +92,7 @@ class Display:
         elif self.active_screen == "credits":
             if self.credits_buttons["back"].is_clicked(event):
                 self.active_screen = "menu"
+                self.music.play_music_menu()
 
     #atualiza a tela
     def update_screen(self):
