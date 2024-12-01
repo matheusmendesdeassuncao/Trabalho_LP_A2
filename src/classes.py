@@ -1,6 +1,15 @@
 import pygame
 import math
 
+def animar(frames, index, fps, frame_time):
+    frame_time += 1
+    if frame_time >= fps:
+        frame_time = 0
+        index += 1
+        if index >= len(frames):
+            index = 0
+    return frames[int(index)], index, frame_time
+
 # Classe que representa um obstáculo no jogo
 class Obstacle:
     def __init__(self, x, y):
@@ -99,7 +108,7 @@ class Player:
         Faz o Player pular, se ele não estiver já no ar.
         """
         if not self.is_jumping:
-            self.vel_y = -15  # Define a velocidade de salto para cima
+            self.vel_y = -12  # Define a velocidade de salto para cima
             self.is_jumping = True  # Marca que o Player está pulando
 
     def apply_gravity(self):
@@ -193,9 +202,12 @@ class Player:
             elif tile == "V" and player_name == "peixonalta":
                 return True  # "V" mata apenas Peixonalta
         return False  # Retorna False se o Player não morreu
+    
+    def desenhar_rects(self, tela):
+        pygame.draw.rect(tela, (0, 255, 0), self.rect, 2)
 
 class Inimigo(pygame.sprite.Sprite):
-    def __init__(self, x, y, image, width, height):
+    def __init__(self, start_pos, y, image, width, height):
         """
         Inicializa um novo inimigo com a posição (x, y), imagem, largura e altura fornecidos.
 
@@ -210,9 +222,8 @@ class Inimigo(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.image = image
-
         self.rect = self.image.get_rect()
-        self.rect.x = x
+        self.rect.x = start_pos
         self.rect.y = y
 
         self.width = width
@@ -223,7 +234,21 @@ class Inimigo(pygame.sprite.Sprite):
         self.no_chao = False
         self.speed = 0
         self.pode_mover = False
-        self.deteccao_distancia = 250
+        self.deteccao_distancia = 200
+
+    def carregar_sprites(self, image_util, num_frames, frame_width, frame_height, start_x = 0, start_y = 0):
+        self.image_util = image_util
+        self.num_frames = num_frames
+        self.frame_width = frame_width
+        self.frame_height = frame_height
+        self.start_x = start_x
+
+        self.frames = []
+        for i in range(num_frames):
+            self.start_x_y = (i * self.frame_width + start_x, start_y)
+            img = self.image_util.subsurface(self.start_x_y, (frame_width, frame_height))
+            self.frames.append(img)
+        return self.frames
 
     def move(self, obstacles):
         """
@@ -255,10 +280,10 @@ class Inimigo(pygame.sprite.Sprite):
         Args:
             obstacles (list): Lista de obstáculos com os quais o Inimigo pode colidir.
         """
+        self.no_chao = False
         if not self.no_chao:
             self.velocidade_y += self.aceleracao_gravidade
             self.rect.y += self.velocidade_y
-            self.no_chao = False
             for obstacle in obstacles:
                 if self.rect.colliderect(obstacle.rect):
                     if self.velocidade_y > 0:
@@ -268,6 +293,7 @@ class Inimigo(pygame.sprite.Sprite):
                     elif self.velocidade_y < 0:
                         self.rect.top = obstacle.rect.bottom
                         self.velocidade_y = 0
+                        self.no_chao = False
 
     def pular(self):
         """
@@ -276,7 +302,7 @@ class Inimigo(pygame.sprite.Sprite):
         if self.no_chao:
             self.velocidade_y = self.salto
             self.no_chao = False
-
+        
     def draw(self, screen):
         """
         Desenha o Inimigo na tela.
@@ -305,6 +331,9 @@ class Inimigo(pygame.sprite.Sprite):
             careca.morrer()
         elif isinstance(self, InimigoPeixonalta) and self.rect.colliderect(peixonalta.rect):
             peixonalta.morrer()
+    
+    def desenhar_rects(self, tela):
+        pygame.draw.rect(tela, (255, 0, 0), self.rect, 2)
 
 class Policial(Inimigo):
     def __init__(self, x, y, image, width, height):
@@ -319,17 +348,23 @@ class Policial(Inimigo):
             height (int): A altura do Inimigo.
         """
         super().__init__(x, y, image, width, height)
-        self.imagens_cobra = []
-        for i in range(7):
-            img = self.image.subsurface((i*28,0), (28, 70))
-            self.imagens_cobra.append(img)
+        # Parado
+        self.idle = self.carregar_sprites(image, 7, 44, 60) 
+        # Correndo
+        self.run_rigth = self.carregar_sprites(image, 7, 44, 60, 836)
+        self.run_left = self.carregar_sprites(image, 7, 44, 60, 1144)
 
         self.index_lista = 0
-        self.image = self.imagens_cobra[self.index_lista]
-
+        self.image = self.idle[self.index_lista]
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+        self.fps = 7
+        self.frame_time = 0
+
+        self.estado = 'idle'
+        self.direcao = 'rigth'
 
     def update(self, careca, peixonalta, obstacles):
         """
@@ -348,16 +383,20 @@ class Policial(Inimigo):
         elif distancia_peixonalta <= self.deteccao_distancia:
             alvo = peixonalta
         else:
+            self.estado = "idle"
             alvo = None
             self.pode_mover = False
             self.speed = 0
 
         if alvo:
+            self.estado = 'running'
             self.pode_mover = True
             if self.rect.x < alvo.rect.x:
-                self.speed = 2
-            elif self.rect.x > alvo.rect.x:
-                self.speed = -2
+                self.direcao = 'rigth'
+                self.speed = 4
+            else:
+                self.direcao = 'left'
+                self.speed = -4
 
             colidiu = self.move(obstacles)
 
@@ -365,17 +404,22 @@ class Policial(Inimigo):
                 self.pular()
 
         self.gravidade(obstacles)
-        
-        if self.index_lista > 6:
-            self.index_lista = 0
-        self.index_lista += 0.1
-        self.image = self.imagens_cobra[int(self.index_lista)]
 
+        if self.estado == "idle":
+            frames = self.idle
+        elif self.estado == "running":
+            if self.direcao == "rigth":
+                frames = self.run_rigth
+            elif self.direcao == "left":
+                frames = self.run_left
+        
+        self.image, self.index_lista, self.frame_time = animar(frames, self.index_lista, self.fps, self.frame_time)
+        
     def verificar_morte(self, careca, peixonalta):
         super().verificar_morte(careca, peixonalta)
 
 class InimigoCareca(Inimigo):
-    def __init__(self, x, y, image, width, height):
+    def __init__(self, start_pos, y, image, width, height):
         """
         Inicializa um Inimigo especializado em perseguir o Careca.
 
@@ -386,24 +430,18 @@ class InimigoCareca(Inimigo):
             width (int): A largura do Inimigo.
             height (int): A altura do Inimigo.
         """
-        super().__init__(x, y, image, width, height)
-        self.start_pos = 675
-        self.end_pos = 850
-        self.current_pos = self.start_pos
+        super().__init__(start_pos, y, image, width, height)
+        self.y = y
+        self.current_pos = start_pos
+        self.end_pos = start_pos + 200
+        self.start_pos = start_pos
         self.direction = 1
 
-        self.left_frames = []
-        self.rigth_frames = []
-
-        for i in range(4):
-            left_frame = self.image.subsurface((i*53, 0), (53, 37))
-            self.left_frames.append(left_frame)
-            rigth_frame = self.image.subsurface((i*53+212, 0), (53, 37))
-            self.rigth_frames.append(rigth_frame)
+        self.left_frames = self.carregar_sprites(image, 4, 53, 37)
+        self.rigth_frames = self.carregar_sprites(image, 4, 53, 37, 212)
 
         self.index_lista = 0
-
-        self.fps = 10
+        self.fps = 7
         self.frame_time = 0
 
     def update(self, careca, peixonalta, obstacles):
@@ -427,15 +465,19 @@ class InimigoCareca(Inimigo):
                 self.direction = 1
 
         self.rect.x = self.current_pos
+        self.rect = pygame.Rect(self.current_pos, self.y, self.width, self.height)
 
-        self.frame_time += 1
-        if self.frame_time >= self.fps:
-            self.frame_time = 0
-            self.index_lista += 1
-            if self.direction == 1:
-                self.image = self.rigth_frames[self.index_lista % 4]
-            else:
-                self.image = self.left_frames[self.index_lista % 4]
+        frames = self.rigth_frames if self.direction == 1 else self.left_frames
+        self.image, self.index_lista, self.frame_time = animar(frames, self.index_lista, self.fps, self.frame_time)
+        
+        #self.frame_time += 1
+        #if self.frame_time >= self.fps:
+        #    self.frame_time = 0
+        #    self.index_lista += 1
+        #    if self.direction == 1:
+        #        self.image = self.rigth_frames[self.index_lista % 4]
+        #    else:
+        #        self.image = self.left_frames[self.index_lista % 4]
 
     def verificar_morte(self, careca):
         """
@@ -445,10 +487,11 @@ class InimigoCareca(Inimigo):
             careca (Player): O jogador Careca.
         """
         if self.rect.colliderect(careca.rect):
+            print(f"Colisão detectada! Inimigo: {self.rect}, Player: {careca.rect}")
             careca.morrer()
 
 class InimigoPeixonalta(Inimigo):
-    def __init__(self, x, y, image, width, height):
+    def __init__(self, start_pos, y, image, width, height):
         """
         Inicializa um Inimigo especializado em perseguir o Peixonalta.
 
@@ -459,25 +502,19 @@ class InimigoPeixonalta(Inimigo):
             width (int): A largura do Inimigo.
             height (int): A altura do Inimigo.
         """
-        super().__init__(x, y, image, width, height)
-        self.start_pos = 1250
-        self.end_pos = 1400
-        self.current_pos = self.start_pos
+        super().__init__(start_pos, y, image, width, height)
+        self.current_pos = start_pos
+        self.start_pos = start_pos
+        self.end_pos = start_pos + 200
         self.direction = 1
 
-        self.left_frames = []
-        self.rigth_frames = []
-
-        for i in range(2):
-            left_frame = self.image.subsurface((i*64, 0), (64, 64))
-            self.left_frames.append(left_frame)
-            rigth_frame = self.image.subsurface((i*64+128, 0), (64, 64))
-            self.rigth_frames.append(rigth_frame)
+        self.left_frames = self.carregar_sprites(image, 2, 64, 44, start_y = 20)
+        self.rigth_frames = self.carregar_sprites(image, 2, 64, 44, 128, 20)
 
         self.index_lista = 0
-
-        self.fps = 10
+        self.fps = 7
         self.frame_time = 0
+        self.y = y + 20
 
     def update(self, careca, peixonalta, obstacles):
         """
@@ -499,16 +536,20 @@ class InimigoPeixonalta(Inimigo):
             else:
                 self.direction = 1
 
-        self.rect.x = self.current_pos
+        #self.rect.x = self.current_pos
+        self.rect = pygame.Rect(self.current_pos, self.y, self.width, self.height)
 
-        self.frame_time += 1
-        if self.frame_time >= self.fps:
-            self.frame_time = 0
-            self.index_lista += 1
-            if self.direction == 1:
-                self.image = self.rigth_frames[self.index_lista % 2]
-            else:
-                self.image = self.left_frames[self.index_lista % 2]
+        frames = self.rigth_frames if self.direction == 1 else self.left_frames
+        self.image, self.index_lista, self.frame_time = animar(frames, self.index_lista, self.fps, self.frame_time)
+
+        #self.frame_time += 1
+        #if self.frame_time >= self.fps:
+        #    self.frame_time = 0
+        #    self.index_lista += 1
+        #    if self.direction == 1:
+        #        self.image = self.rigth_frames[self.index_lista % 2]
+        #    else:
+        #        self.image = self.left_frames[self.index_lista % 2]
 
     def verificar_morte(self, peixonalta):
         """
@@ -518,8 +559,8 @@ class InimigoPeixonalta(Inimigo):
             peixonalta (Player): O jogador Peixonalta.
         """
         if self.rect.colliderect(peixonalta.rect):
+            print(f"Colisão detectada! Inimigo: {self.rect}, Player: {peixonalta.rect}")
             peixonalta.morrer()
-
 
 class Chave(pygame.sprite.Sprite):
     def __init__(self, x, y, sprites):

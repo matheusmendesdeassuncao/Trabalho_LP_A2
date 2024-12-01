@@ -12,7 +12,7 @@ door_opening_width = 0
 # Carrega as imagens dos personagens e dos inimigos e das chaves
 careca_img = load_image(IMAGE_PATH, 'players/careca_final.png', 64, 64)
 peixonalta_img = load_image(IMAGE_PATH, 'players/peixonauta_final.png', 48, 32)
-inimigo_img = load_image(IMAGE_PATH, 'enemies/idle_policial.png', 196, 70)
+inimigo_img = load_image(IMAGE_PATH, 'enemies/policial.png', 1452, 60)
 inimigo_peixonalta_img = load_image(IMAGE_PATH, 'enemies/gato.png', 256, 64)
 inimigo_careca_img = load_image(IMAGE_PATH, 'enemies/cobra.png', 424, 37)
 
@@ -24,8 +24,8 @@ for i in range(1, 9):
     chave_img = load_image(IMAGE_PATH, f'keys/key-{i}.png.png', 19, 37)  # Substitua pelo caminho correto
     chave_sprites.append(chave_img)
 
-porta_careca = Door(160, 70, porta_careca_img, 64, 64, 11)
-porta_peixonauta = Door(1260, 70, porta_peixonauta_img, 64, 64, 11)
+porta_careca = Door(160, 135, porta_careca_img, 64, 64, 11)
+porta_peixonauta = Door(225, 135, porta_peixonauta_img, 64, 64, 11)
 
 # Verifica se as imagens foram carregadas corretamente
 if careca_img is None or peixonalta_img is None:
@@ -34,14 +34,16 @@ if careca_img is None or peixonalta_img is None:
     exit()
 
 # Inicialização dos personagens
-careca = Player(100, 600, careca_img, 64, 64)
-peixonalta = Player(200, 600, peixonalta_img, 64, 64)
+careca = Player(100, 700, careca_img, 64, 64)
+peixonalta = Player(200, 700, peixonalta_img, 50, 64)
 
 # Inicializa os inimigos
 inimigos = [
-    InimigoCareca(800, 570, inimigo_careca_img, 64, 64),  # Inimigo que persegue apenas Careca
-    InimigoPeixonalta(1700, 415, inimigo_peixonalta_img, 64, 64),  # Inimigo que persegue apenas Peixonalta
-    Policial(1000, 250, inimigo_img, 64, 64)  # Inimigo genérico que persegue ambos os personagens
+    InimigoCareca(350, 667, inimigo_careca_img, 53, 37),  # Inimigo que persegue apenas Careca
+    InimigoCareca(900, 762, inimigo_careca_img, 53, 37),
+    InimigoPeixonalta(350, 736, inimigo_peixonalta_img, 64, 44),  # Inimigo que persegue apenas Peixonalta
+    InimigoPeixonalta(900, 640, inimigo_peixonalta_img, 64, 44),
+    Policial(80, 250, inimigo_img, 64, 64)  # Inimigo genérico que persegue ambos os personagens
 ]
 
 # Loop principal do jogo
@@ -49,8 +51,8 @@ running = True
 clock = pygame.time.Clock()
 
 # Criar instâncias das chaves e definir suas posições no mapa
-chave1 = Chave(295, 340, chave_sprites)  # Posição 1 da chave
-chave2 = Chave(1125, 370, chave_sprites)  # Posição 2 da chave
+chave1 = Chave(760, 70, chave_sprites)  # Posição 1 da chave
+chave2 = Chave(810, 70, chave_sprites)  # Posição 2 da chave
 
 # Adicionar as chaves ao jogo (presumindo que você tenha uma lista ou grupo de objetos 'chaves')
 chaves = pygame.sprite.Group()  # Usando um grupo para gerenciar as chaves
@@ -75,24 +77,27 @@ while running:  # Loop principal do jogo
     if keys[pygame.K_d]:  # Se a tecla 'd' for pressionada
         careca.move(1, obstacles)   # Move o Careca para a direita
     if keys[pygame.K_w]:  # Se a tecla 'w' for pressionada
-        careca.jump()               # Faz o Careca pular
+        careca.jump()  # Faz o Careca pular
     if keys[pygame.K_LEFT]:  # Se a tecla de seta para a esquerda for pressionada
         peixonalta.move(-1, obstacles)  # Move o Peixonalta para a esquerda
     if keys[pygame.K_RIGHT]:  # Se a tecla de seta para a direita for pressionada
         peixonalta.move(1, obstacles)   # Move o Peixonalta para a direita
     if keys[pygame.K_UP]:  # Se a tecla de seta para cima for pressionada
-        peixonalta.jump()             # Faz o Peixonalta pular
+        peixonalta.jump()  # Faz o Peixonalta pular
 
     SCREEN.blit(fundo_img, (0, 0)) # Desenha a tela de fundo
 
     porta_careca.draw(SCREEN)
     porta_peixonauta.draw(SCREEN)
 
-    obstacles = draw_level(SCREEN, LEVEL)  # Desenha o nível e obtém os obstáculos
+    obstacles = draw_level(SCREEN, LEVEL2)  # Desenha o nível e obtém os obstáculos
     careca.update(obstacles)  # Atualiza o estado do Careca
     peixonalta.update(obstacles)  # Atualiza o estado do Peixonalta
     careca.draw(SCREEN)  # Desenha o Careca na tela
     peixonalta.draw(SCREEN)  # Desenha o Peixonalta na tela
+
+    careca.desenhar_rects(SCREEN)
+    peixonalta.desenhar_rects(SCREEN)
 
     # Atualiza as chaves
     for chave in chaves:
@@ -116,16 +121,19 @@ while running:  # Loop principal do jogo
             running = False
 
     # Verifica se algum jogador morreu
-    if careca.check_death(LEVEL, "careca"):  # Se o Careca morreu
+    if careca.check_death(LEVEL2, "careca"):  # Se o Careca morreu
         print("Careca morreu! kkkkkkkkkk")
         running = False  # Encerra o jogo
-    if peixonalta.check_death(LEVEL, "peixonalta"):  # Se o Peixonalta morreu
+    if peixonalta.check_death(LEVEL2, "peixonalta"):  # Se o Peixonalta morreu
         print("Peixonalta morreu! kkkkkkkkkk")
         running = False  # Encerra o jogo
 
     # Atualiza e desenha inimigos
     for inimigo in inimigos:
         inimigo.update(careca, peixonalta, obstacles)  # Atualiza o inimigo
+
+        inimigo.desenhar_rects(SCREEN)
+        
         inimigo.draw(SCREEN)  # Desenha o inimigo na tela
 
         # Verifica colisão entre inimigos e personagens
