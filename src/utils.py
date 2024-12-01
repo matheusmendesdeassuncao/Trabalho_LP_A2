@@ -11,7 +11,7 @@ YELLOW = (255, 255, 0)  # Cor para o obstáculo 'V'
 
 # Configuração da tela
 SCREEN_WIDTH = 1600
-SCREEN_HEIGHT = 750
+SCREEN_HEIGHT = 900
 
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -43,7 +43,7 @@ def load_image(image_path, file_name, width, height):
         return None
 
 # Define o layout do nível do jogo.
-LEVEL = [
+LEVEL1 = [
     "##################################################",
     "#                        U                       #",
     "#                                       E        #",
@@ -67,6 +67,35 @@ LEVEL = [
     "#   ########   #       ##             XX  XXX    #",
     "#   ########X                 X     V        XX  #",
     "#   #########     XXX      XXX#     X     XX     #",
+    "##################################################"
+]
+
+LEVEL2 = [
+    "##################################################",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#XXXXXXXXXXXXXXXXXXXXX       XXXXXXXXXX          #",
+    "#                                 #####X         #",
+    "#                                  #####X        #",
+    "#                                           XXXXX#",
+    "#                                           ######",
+    "#                                           ######",
+    "#                                        XXX######",
+    "#                    XXXXXXXXX           #########",
+    "#          XXXXXXXXXX#########XXXXXXXXXXX#########",
+    "#                                                #",
+    "#XXXX                                            #",
+    "#####                                            #",
+    "#####XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX      #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#          XXXXXXXX         XXXXXXXX           XX#",
+    "#                                            XX###",
+    "#                                          XX#####",
     "##################################################"
 ]
 
