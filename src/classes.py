@@ -2,13 +2,18 @@ import pygame
 import math
 
 def animar(frames, index, fps, frame_time):
+    if not frames:  # Se a lista de frames estiver vazia
+        print("Erro: Lista de frames está vazia!")
+        return None, index, frame_time
+    
     frame_time += 1
     if frame_time >= fps:
         frame_time = 0
-        index += 1
-        if index >= len(frames):
-            index = 0
-    return frames[int(index)], index, frame_time
+        index = (index + 1) % len(frames)
+        #index += 1
+        #if index >= len(frames):
+        #    index = 0
+    return frames[index], index, frame_time
 
 # Classe que representa um obstáculo no jogo
 class Obstacle:
@@ -76,8 +81,8 @@ class Door:
         return False
 
 # Classe que representa um Player no jogo
-class Player:
-    def __init__(self, x: int, y: int, image, width: int = 64, height: int = 64):
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y, image, width, height):
         """
         Inicializa um novo Player na posição (x, y) com a imagem fornecida.
 
@@ -88,15 +93,58 @@ class Player:
             width (int, opcional): Largura do Player. Padrão é 64.
             height (int, opcional): Altura do Player. Padrão é 64.
         """
-        self.rect = pygame.Rect(x, y, width, height)  # A área do Player (retângulo)
-        self.image = image  # A imagem do Player
-        self.vel_y = 0  # Velocidade vertical (para pular e gravidade)
-        self.gravity = 0.5  # A intensidade da gravidade
+        super().__init__()
+        pygame.sprite.Sprite.__init__(self)
+        #self.rect = pygame.Rect(x, y, width, height)  # A área do Player (retângulo)
+
+        #self.image = image
+        #self.rect = self.image.get_rect()
+        #self.rect.x = x
+        #self.rect.y = y
+
+        self.width = width
+        self.height = height
+        self.vel_y = 0
+        self.gravity = 0.5
+        self.speed = 3
         self.is_jumping = False  # Indica se o Player está pulando
         self.is_alive = True  # Indica se o Player está vivo
-        self.speed = 5  # Velocidade do Player
         self.direction = pygame.Vector2(0, 0)  # Direção de movimento (horizontal e vertical)
         self.pegou_chave = False  # Adicionando o atributo pegou_chave
+
+        # Parado
+        self.idle = self.carregar_sprites(image, 2, width, height)
+        # Correndo
+        self.run_rigth = self.carregar_sprites(image, 2, width, height, width*2)
+        self.run_left = self.carregar_sprites(image, 2, width, height, width*4)
+        # Pulando
+        self.jump_rigth = self.carregar_sprites(image, 1, width, height, width*2)
+        self.jump_left = self.carregar_sprites(image, 1, width, height, width*4)
+
+        self.index_lista = 0
+        self.image = self.idle[self.index_lista]
+        self.rect = self.image.get_rect()
+        #self.rect.x = x
+        #self.rect.y = y
+
+        if height > 64:
+            self.rect = pygame.Rect(x, y, width, height-1)
+        else:
+            self.rect = pygame.Rect(x, y, width, height+14)
+
+        self.fps = 12
+        self.frame_time = 0
+
+        self.estado = 'idle'
+        self.direcao = 'rigth'
+
+    def carregar_sprites(self, image_util, num_frames, frame_width, frame_height, start_x = 0, start_y = 0):
+        frames = []
+        for i in range(num_frames):
+            start_x_y = (i * frame_width + start_x, start_y)
+            img = image_util.subsurface(start_x_y, (frame_width, frame_height))
+            frames.append(img)
+        return frames
 
     def pegar_chave(self):
         # Supondo que a chave seja um objeto ou algo que você possa checar se foi pego
@@ -108,6 +156,7 @@ class Player:
         Faz o Player pular, se ele não estiver já no ar.
         """
         if not self.is_jumping:
+            self.estado = "jumping"
             self.vel_y = -12  # Define a velocidade de salto para cima
             self.is_jumping = True  # Marca que o Player está pulando
 
@@ -151,7 +200,7 @@ class Player:
                     self.rect.top = obstacle.rect.bottom  # Resolve colisão com o teto
                     self.vel_y = 0  # Zera a velocidade vertical
 
-    def move(self, dx, obstacles):
+    def move(self, dx, obstacles, key):
         """
         Move o Player horizontalmente e verifica colisões.
 
@@ -159,8 +208,15 @@ class Player:
             dx (int): A direção do movimento (positivo para direita, negativo para esquerda).
             obstacles (list): Lista de obstáculos com os quais o Player pode colidir.
         """
+        self.estado = "running"
         self.direction.x = dx  # Define a direção horizontal do movimento
         self.horizontal_movement_collision(obstacles)  # Verifica e resolve colisões horizontais
+        if key == "rigth":
+            self.direcao = "rigth"
+        if key == "left":
+            self.direcao = "left"
+        if key == "idle":
+            self.estado = "idle"
 
     def update(self, obstacles):
         """
@@ -172,6 +228,25 @@ class Player:
         if self.is_alive:
             self.vertical_movement_collision(obstacles)  # Verifica e resolve colisões verticais
 
+            frames = self.idle
+            if self.estado == "idle":
+                frames = self.idle
+            elif self.estado == "running":
+                if self.direcao == "rigth":
+                    frames = self.run_rigth
+                elif self.direcao == "left":
+                    frames = self.run_left
+            elif self.estado == "jumping":
+                if self.direcao == "rigth":
+                    frames = self.jump_rigth
+                elif self.direcao == "left":
+                    frames = self.jump_left
+            
+            if self.index_lista >= len(frames):
+                self.index_lista = 0
+
+            self.image, self.index_lista, self.frame_time = animar(frames, self.index_lista, self.fps, self.frame_time)
+            
     def draw(self, screen: pygame.Surface):
         """
         Desenha o Player na tela.
@@ -203,8 +278,8 @@ class Player:
                 return True  # "V" mata apenas Peixonalta
         return False  # Retorna False se o Player não morreu
     
-    def desenhar_rects(self, tela):
-        pygame.draw.rect(tela, (0, 255, 0), self.rect, 2)
+    #def desenhar_rects(self, tela):
+    #    pygame.draw.rect(tela, (0, 255, 0), self.rect, 2)
 
 class Inimigo(pygame.sprite.Sprite):
     def __init__(self, start_pos, y, image, width, height):
@@ -237,18 +312,12 @@ class Inimigo(pygame.sprite.Sprite):
         self.deteccao_distancia = 200
 
     def carregar_sprites(self, image_util, num_frames, frame_width, frame_height, start_x = 0, start_y = 0):
-        self.image_util = image_util
-        self.num_frames = num_frames
-        self.frame_width = frame_width
-        self.frame_height = frame_height
-        self.start_x = start_x
-
-        self.frames = []
+        frames = []
         for i in range(num_frames):
-            self.start_x_y = (i * self.frame_width + start_x, start_y)
-            img = self.image_util.subsurface(self.start_x_y, (frame_width, frame_height))
-            self.frames.append(img)
-        return self.frames
+            start_x_y = (i * frame_width + start_x, start_y)
+            img = image_util.subsurface(start_x_y, (frame_width, frame_height))
+            frames.append(img)
+        return frames
 
     def move(self, obstacles):
         """
@@ -332,8 +401,8 @@ class Inimigo(pygame.sprite.Sprite):
         elif isinstance(self, InimigoPeixonalta) and self.rect.colliderect(peixonalta.rect):
             peixonalta.morrer()
     
-    def desenhar_rects(self, tela):
-        pygame.draw.rect(tela, (255, 0, 0), self.rect, 2)
+    #def desenhar_rects(self, tela):
+    #    pygame.draw.rect(tela, (255, 0, 0), self.rect, 2)
 
 class Policial(Inimigo):
     def __init__(self, x, y, image, width, height):

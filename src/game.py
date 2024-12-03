@@ -10,8 +10,8 @@ pygame.display.set_caption("A fuga de careca e Peixonalta de Bangu")
 door_opening_width = 0
 
 # Carrega as imagens dos personagens e dos inimigos e das chaves
-careca_img = load_image(IMAGE_PATH, 'players/careca_final.png', 64, 64)
-peixonalta_img = load_image(IMAGE_PATH, 'players/peixonauta_final.png', 48, 32)
+careca_img = load_image(IMAGE_PATH, 'players/prision_careca.png', 187.5, 65)
+peixonalta_img = load_image(IMAGE_PATH, 'players/prision_peixonauta.png', 300, 40)
 inimigo_img = load_image(IMAGE_PATH, 'enemies/policial.png', 1452, 60)
 inimigo_peixonalta_img = load_image(IMAGE_PATH, 'enemies/gato.png', 256, 64)
 inimigo_careca_img = load_image(IMAGE_PATH, 'enemies/cobra.png', 424, 37)
@@ -34,8 +34,8 @@ if careca_img is None or peixonalta_img is None:
     exit()
 
 # Inicialização dos personagens
-careca = Player(100, 700, careca_img, 64, 64)
-peixonalta = Player(200, 700, peixonalta_img, 50, 64)
+careca = Player(100, 700, careca_img, 31.25, 65)
+peixonalta = Player(200, 700, peixonalta_img, 50, 40)
 
 # Inicializa os inimigos
 inimigos = [
@@ -43,7 +43,7 @@ inimigos = [
     InimigoCareca(900, 762, inimigo_careca_img, 53, 37),
     InimigoPeixonalta(350, 736, inimigo_peixonalta_img, 64, 44),  # Inimigo que persegue apenas Peixonalta
     InimigoPeixonalta(900, 640, inimigo_peixonalta_img, 64, 44),
-    Policial(80, 250, inimigo_img, 64, 64)  # Inimigo genérico que persegue ambos os personagens
+    Policial(80, 250, inimigo_img, 44, 60)  # Inimigo genérico que persegue ambos os personagens
 ]
 
 # Loop principal do jogo
@@ -70,21 +70,6 @@ while running:  # Loop principal do jogo
         if event.type == pygame.QUIT:  # Se o evento for o de fechar a janela
             running = False  # Interrompe o loop, fechando o jogo
 
-    # Controles do jogador
-    keys = pygame.key.get_pressed()  # Obtém o estado atual das teclas pressionadas
-    if keys[pygame.K_a]:  # Se a tecla 'a' for pressionada
-        careca.move(-1, obstacles)  # Move o Careca para a esquerda
-    if keys[pygame.K_d]:  # Se a tecla 'd' for pressionada
-        careca.move(1, obstacles)   # Move o Careca para a direita
-    if keys[pygame.K_w]:  # Se a tecla 'w' for pressionada
-        careca.jump()  # Faz o Careca pular
-    if keys[pygame.K_LEFT]:  # Se a tecla de seta para a esquerda for pressionada
-        peixonalta.move(-1, obstacles)  # Move o Peixonalta para a esquerda
-    if keys[pygame.K_RIGHT]:  # Se a tecla de seta para a direita for pressionada
-        peixonalta.move(1, obstacles)   # Move o Peixonalta para a direita
-    if keys[pygame.K_UP]:  # Se a tecla de seta para cima for pressionada
-        peixonalta.jump()  # Faz o Peixonalta pular
-
     SCREEN.blit(fundo_img, (0, 0)) # Desenha a tela de fundo
 
     porta_careca.draw(SCREEN)
@@ -96,8 +81,28 @@ while running:  # Loop principal do jogo
     careca.draw(SCREEN)  # Desenha o Careca na tela
     peixonalta.draw(SCREEN)  # Desenha o Peixonalta na tela
 
-    careca.desenhar_rects(SCREEN)
-    peixonalta.desenhar_rects(SCREEN)
+    #careca.desenhar_rects(SCREEN)
+    #peixonalta.desenhar_rects(SCREEN)
+
+    # Controles do jogador
+    keys = pygame.key.get_pressed()  # Obtém o estado atual das teclas pressionadas
+    if keys[pygame.K_a]:  # Se a tecla 'a' for pressionada
+        careca.move(-1, obstacles, "left")  # Move o Careca para a esquerda
+    if keys[pygame.K_d]:  # Se a tecla 'd' for pressionada
+        careca.move(1, obstacles, "rigth")   # Move o Careca para a direita
+    if keys[pygame.K_w]:  # Se a tecla 'w' for pressionada
+        careca.jump()  # Faz o Careca pular
+    if not keys[pygame.K_a] and not keys[pygame.K_d]:
+        careca.move(0, obstacles, "idle")
+
+    if keys[pygame.K_LEFT]:  # Se a tecla de seta para a esquerda for pressionada
+        peixonalta.move(-1, obstacles, "left")  # Move o Peixonalta para a esquerda
+    if keys[pygame.K_RIGHT]:  # Se a tecla de seta para a direita for pressionada
+        peixonalta.move(1, obstacles, "rigth")   # Move o Peixonalta para a direita
+    if keys[pygame.K_UP]:  # Se a tecla de seta para cima for pressionada
+        peixonalta.jump()  # Faz o Peixonalta pular
+    if not keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
+        peixonalta.move(0, obstacles, "idle")
 
     # Atualiza as chaves
     for chave in chaves:
@@ -132,7 +137,7 @@ while running:  # Loop principal do jogo
     for inimigo in inimigos:
         inimigo.update(careca, peixonalta, obstacles)  # Atualiza o inimigo
 
-        inimigo.desenhar_rects(SCREEN)
+        #inimigo.desenhar_rects(SCREEN)
         
         inimigo.draw(SCREEN)  # Desenha o inimigo na tela
 
