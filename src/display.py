@@ -4,6 +4,12 @@ from music import Music
 
 class Display:
     def __init__(self, screen):
+        """
+        Inicializa os atributos principais do jogo e configura as telas iniciais.
+
+        Args:
+            screen (pygame.Surface): A superfície principal onde os elementos do jogo serão renderizados.
+        """
         self.screen = screen
         self.active_screen = "menu"
         self.music = Music()
@@ -12,6 +18,9 @@ class Display:
         self.init_credits()
 
     def init_menu(self):
+        """
+        Inicializa os elementos do menu principal.
+        """
         #carrega a imagem e ajusta o tamanho
         self.menu_background = pygame.image.load("../assets/background_menu.png")
         self.menu_background = pygame.transform.scale(self.menu_background, (self.screen.get_width(), self.screen.get_height()))
@@ -27,6 +36,9 @@ class Display:
 
     #inicializa elementos da tela credits
     def init_credits(self):
+        """
+        Inicializa os elementos da tela de creditos.
+        """
         #carrega a imagem e ajusta o tamanho
         self.credits_background = pygame.image.load("../assets/background_credits.png")
         self.credits_background = pygame.transform.scale(self.credits_background, (self.screen.get_width(), self.screen.get_height()))
@@ -38,12 +50,18 @@ class Display:
 
     #desenha a tela menu
     def menu_screen(self):
+        """
+        Renderiza a tela do menu principal.
+        """
         self.screen.blit(self.menu_background, (0, 0))
         for button in self.menu_buttons.values():
             button.draw(self.screen)
     
     #desenha a tela credits
     def credits_screen(self):
+        """
+        Renderiza a tela de creditos.
+        """
         self.screen.blit(self.credits_background, (0, 0))
 
         #inicialize a fonte
@@ -77,6 +95,12 @@ class Display:
 
     #verifica os eventos
     def handle_events(self, event):
+        """
+        Gerencia os eventos com base na tela ativa.
+
+        Args:
+            event: O evento capturado pelo Pygame, como cliques ou teclas pressionadas.
+        """
         #verifica os eventos no menu
         if self.active_screen == "menu":
             if self.menu_buttons["play"].is_clicked(event):
@@ -96,6 +120,9 @@ class Display:
 
     #atualiza a tela
     def update_screen(self):
+        """
+        Atualiza a tela com base na tela ativa.
+        """
         if self.active_screen == "menu":
             self.menu_screen()
         elif self.active_screen == "credits":
