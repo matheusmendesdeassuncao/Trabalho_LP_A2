@@ -3,74 +3,6 @@ from classes import Player, Door, Policial, InimigoPeixonalta, InimigoCareca, Ch
 from utils import *
 from menu import Display
 
-# Carrega as imagens dos personagens e dos inimigos e das chaves
-careca_img = load_image(IMAGE_PATH, 'players/prision_careca.png', 187.5, 65)
-peixonalta_img = load_image(IMAGE_PATH, 'players/prision_peixonauta.png', 300, 40)
-inimigo_img = load_image(IMAGE_PATH, 'enemies/policial.png', 1452, 60)
-inimigo_peixonalta_img = load_image(IMAGE_PATH, 'enemies/gato.png', 256, 64)
-inimigo_careca_img = load_image(IMAGE_PATH, 'enemies/cobra.png', 424, 37)
-
-porta_careca_img = load_image(IMAGE_PATH, 'doors/porta_careca_opening.png', 396, 57)
-porta_peixonauta_img = load_image(IMAGE_PATH, 'doors/porta_peixonauta_opening.png', 572, 32)
-
-chave_sprites = []
-for i in range(1, 9):
-    chave_img = load_image(IMAGE_PATH, f'keys/key-{i}.png.png', 19, 37)  # Substitua pelo caminho correto
-    chave_sprites.append(chave_img)
-
-# Verifica se as imagens foram carregadas corretamente
-if careca_img is None or peixonalta_img is None:
-    print("Erro: Imagem não encontrada.")
-    pygame.quit()
-    exit()
-
-def load_level(num):
-    global inimigos, porta_careca, porta_peixonauta, chaves, careca, peixonalta
-
-    if num == 1:
-        # Inicializa as portas
-        porta_careca = Door(160, 135, porta_careca_img, 64, 64, 11)
-        porta_peixonauta = Door(225, 135, porta_peixonauta_img, 64, 64, 11)
-
-        careca = Player(100, 700, careca_img, 31.25, 65)
-        peixonalta = Player(200, 700, peixonalta_img, 50, 40)
-
-        # Inicializa os inimigos
-        inimigos = [
-            InimigoCareca(350, 667, inimigo_careca_img, 53, 37),  # Inimigo que persegue apenas Careca
-            InimigoCareca(900, 762, inimigo_careca_img, 53, 37),
-            InimigoPeixonalta(350, 736, inimigo_peixonalta_img, 64, 44),  # Inimigo que persegue apenas Peixonalta
-            InimigoPeixonalta(900, 640, inimigo_peixonalta_img, 64, 44),
-            Policial(80, 250, inimigo_img, 44, 60)
-        ]
-
-        # Criar instâncias das chaves e definir suas posições no mapa
-        chave1 = Chave(760, 70, chave_sprites)
-        chave2 = Chave(810, 70, chave_sprites)
-        chaves = pygame.sprite.Group(chave1, chave2)
-
-    if num == 2:
-        # Inicializa as portas
-        porta_careca = Door(500, 232, porta_careca_img, 64, 64, 11)
-        porta_peixonauta = Door(900, 230, porta_peixonauta_img, 64, 64, 11)
-
-        careca = Player(100, 100, careca_img, 31.25, 65)
-        peixonalta = Player(200, 100, peixonalta_img, 50, 40)
-
-        # Inicializa os inimigos (modifique conforme a estrutura do seu nível)
-        inimigos = [
-            InimigoCareca(600, 90, inimigo_careca_img, 53, 37),  # Inimigo que persegue apenas Careca
-            InimigoCareca(900, 634, inimigo_careca_img, 53, 37),
-            InimigoPeixonalta(220, 580, inimigo_peixonalta_img, 64, 44),  # Inimigo que persegue apenas Peixonalta
-            InimigoPeixonalta(600, 735, inimigo_peixonalta_img, 64, 44),
-            Policial(1350, 720, inimigo_img, 44, 60)
-        ]
-
-        # Inicializa as chaves (substitua conforme o layout do nível)
-        chave1 = Chave(370, 720, chave_sprites)
-        chave2 = Chave(806, 700, chave_sprites)
-        chaves = pygame.sprite.Group(chave1, chave2)
-
 def run_game():
     # Inicializa o Pygame
     pygame.init()
@@ -84,7 +16,75 @@ def run_game():
     running = True
     clock = pygame.time.Clock()
 
+    # Carrega as imagens dos personagens e dos inimigos e das chaves
+    careca_img = load_image(IMAGE_PATH, 'players/prision_careca.png', 187.5, 65)
+    peixonalta_img = load_image(IMAGE_PATH, 'players/prision_peixonauta.png', 300, 40)
+    inimigo_img = load_image(IMAGE_PATH, 'enemies/policial.png', 1452, 60)
+    inimigo_peixonalta_img = load_image(IMAGE_PATH, 'enemies/gato.png', 256, 64)
+    inimigo_careca_img = load_image(IMAGE_PATH, 'enemies/cobra.png', 424, 37)
+
+    porta_careca_img = load_image(IMAGE_PATH, 'doors/porta_careca_opening.png', 396, 57)
+    porta_peixonauta_img = load_image(IMAGE_PATH, 'doors/porta_peixonauta_opening.png', 572, 32)
+
+    chave_sprites = []
+    for i in range(1, 9):
+        chave_img = load_image(IMAGE_PATH, f'keys/key-{i}.png.png', 19, 37)  # Substitua pelo caminho correto
+        chave_sprites.append(chave_img)
+
+    # Verifica se as imagens foram carregadas corretamente
+    if careca_img is None or peixonalta_img is None:
+        print("Erro: Imagem não encontrada.")
+        pygame.quit()
+        exit()
+
     atual_index = 0
+
+    def load_level(num):
+        global inimigos, porta_careca, porta_peixonauta, chaves, careca, peixonalta
+
+        if num == 1:
+            # Inicializa as portas
+            porta_careca = Door(160, 135, porta_careca_img, 64, 64, 11)
+            porta_peixonauta = Door(225, 135, porta_peixonauta_img, 64, 64, 11)
+
+            careca = Player(100, 700, careca_img, 31.25, 65)
+            peixonalta = Player(200, 700, peixonalta_img, 50, 40)
+
+            # Inicializa os inimigos
+            inimigos = [
+                InimigoCareca(350, 667, inimigo_careca_img, 53, 37),  # Inimigo que persegue apenas Careca
+                InimigoCareca(900, 762, inimigo_careca_img, 53, 37),
+                InimigoPeixonalta(350, 736, inimigo_peixonalta_img, 64, 44),  # Inimigo que persegue apenas Peixonalta
+                InimigoPeixonalta(900, 640, inimigo_peixonalta_img, 64, 44),
+                Policial(80, 250, inimigo_img, 44, 60)
+            ]
+
+            # Criar instâncias das chaves e definir suas posições no mapa
+            chave1 = Chave(760, 70, chave_sprites)
+            chave2 = Chave(810, 70, chave_sprites)
+            chaves = pygame.sprite.Group(chave1, chave2)
+
+        if num == 2:
+            # Inicializa as portas
+            porta_careca = Door(500, 232, porta_careca_img, 64, 64, 11)
+            porta_peixonauta = Door(900, 230, porta_peixonauta_img, 64, 64, 11)
+
+            careca = Player(100, 100, careca_img, 31.25, 65)
+            peixonalta = Player(200, 100, peixonalta_img, 50, 40)
+
+            # Inicializa os inimigos (modifique conforme a estrutura do seu nível)
+            inimigos = [
+                InimigoCareca(600, 90, inimigo_careca_img, 53, 37),  # Inimigo que persegue apenas Careca
+                InimigoCareca(900, 634, inimigo_careca_img, 53, 37),
+                InimigoPeixonalta(220, 580, inimigo_peixonalta_img, 64, 44),  # Inimigo que persegue apenas Peixonalta
+                InimigoPeixonalta(600, 735, inimigo_peixonalta_img, 64, 44),
+                Policial(1350, 720, inimigo_img, 44, 60)
+            ]
+
+            # Inicializa as chaves (substitua conforme o layout do nível)
+            chave1 = Chave(370, 720, chave_sprites)
+            chave2 = Chave(806, 700, chave_sprites)
+            chaves = pygame.sprite.Group(chave1, chave2)
         
     font = pygame.font.SysFont(None, 55)
 
@@ -200,6 +200,3 @@ def run_game():
         clock.tick(60)  # Controla a taxa de quadros por segundo (FPS), limitando a 60 FPS
     
     pygame.quit()
-
-if __name__ == "__main__":
-    run_game()
