@@ -3,18 +3,6 @@ from classes import Player, Door, Policial, InimigoPeixonalta, InimigoCareca, Ch
 from utils import *
 from menu import Display
 
-# Inicializa o Pygame
-pygame.init()
-
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT)) 
-display = Display(SCREEN)
-
-pygame.display.set_caption("A fuga de careca e Peixonalta de Bangu")
-
-# Loop principal do jogo
-running = True
-clock = pygame.time.Clock()
-
 # Carrega as imagens dos personagens e dos inimigos e das chaves
 careca_img = load_image(IMAGE_PATH, 'players/prision_careca.png', 187.5, 65)
 peixonalta_img = load_image(IMAGE_PATH, 'players/prision_peixonauta.png', 300, 40)
@@ -35,8 +23,6 @@ if careca_img is None or peixonalta_img is None:
     print("Erro: Imagem não encontrada.")
     pygame.quit()
     exit()
-
-atual_index = 0
 
 def load_level(num):
     global inimigos, porta_careca, porta_peixonauta, chaves, careca, peixonalta
@@ -84,116 +70,136 @@ def load_level(num):
         chave1 = Chave(370, 720, chave_sprites)
         chave2 = Chave(806, 700, chave_sprites)
         chaves = pygame.sprite.Group(chave1, chave2)
-    
-font = pygame.font.SysFont(None, 55)
 
-def victory():
-    text = font.render("END", True, GREEN)
-    SCREEN.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
+def run_game():
+    # Inicializa o Pygame
+    pygame.init()
 
-num = 1
-load_level(num)
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT)) 
+    display = Display(SCREEN)
 
-while running:  # Loop principal do jogo
-    # Eventos do Pygame (ex: fechar a janela)
-    for event in pygame.event.get():  # Verifica todos os eventos do Pygame
-        if event.type == pygame.QUIT:  # Se o evento for o de fechar a janela
-            pygame.quit()
-            #running = False  # Interrompe o loop, fechando o jogo
-        display.handle_events(event)
+    pygame.display.set_caption("A fuga de careca e Peixonalta de Bangu")
 
-    SCREEN.blit(fundo_img, (0, 0)) # Desenha a tela de fundo
+    # Loop principal do jogo
+    running = True
+    clock = pygame.time.Clock()
 
-    obstacles = draw_level(SCREEN, levels[atual_index]) # Desenha o nível e obtém os obstáculos
-
-    porta_careca.draw(SCREEN)
-    porta_peixonauta.draw(SCREEN)
-
-    careca.update(obstacles)  # Atualiza o estado do Careca
-    peixonalta.update(obstacles)  # Atualiza o estado do Peixonalta
-    careca.draw(SCREEN)  # Desenha o Careca na tela
-    peixonalta.draw(SCREEN)  # Desenha o Peixonalta na tela
-
-    # Controles do jogador
-    keys = pygame.key.get_pressed()  # Obtém o estado atual das teclas pressionadas
-    if keys[pygame.K_a]:  # Se a tecla 'a' for pressionada
-        careca.move(-1, obstacles, "left")  # Move o Careca para a esquerda
-    if keys[pygame.K_d]:  # Se a tecla 'd' for pressionada
-        careca.move(1, obstacles, "rigth")   # Move o Careca para a direita
-    if keys[pygame.K_w]:  # Se a tecla 'w' for pressionada
-        careca.jump()  # Faz o Careca pular
-    if not keys[pygame.K_a] and not keys[pygame.K_d]:
-        careca.move(0, obstacles, "idle")
-
-    if keys[pygame.K_LEFT]:  # Se a tecla de seta para a esquerda for pressionada
-        peixonalta.move(-1, obstacles, "left")  # Move o Peixonalta para a esquerda
-    if keys[pygame.K_RIGHT]:  # Se a tecla de seta para a direita for pressionada
-        peixonalta.move(1, obstacles, "rigth")   # Move o Peixonalta para a direita
-    if keys[pygame.K_UP]:  # Se a tecla de seta para cima for pressionada
-        peixonalta.jump()  # Faz o Peixonalta pular
-    if not keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
-        peixonalta.move(0, obstacles, "idle")
-
-    # Atualiza as chaves
-    for chave in chaves:
-        chave.colisao(careca)  # Verifica se o Careca pegou a chave
-        chave.colisao(peixonalta)  # Verifica se o Peixonalta pegou a chave
-        porta_careca.interact(careca, chave)
-        porta_peixonauta.interact(peixonalta, chave)
-
-    porta_careca.animate()
-    porta_peixonauta.animate()
-    
-    # Desenha as chaves no mapa
-    chaves.draw(SCREEN)  # Desenha cada chave no mapa
-    chaves.update()
-
-    if porta_careca.check_victory(careca) and careca.pegou_chave:
-        if porta_peixonauta.check_victory(peixonalta) and peixonalta.pegou_chave:
-            atual_index += 1
-            if atual_index < len(levels):  # Verifica se há mais níveis
-                num += 1
-                load_level(num)
-            else:
-                victory()  # Exibe a mensagem de fim de jogo
-                pygame.display.flip()  # Atualiza a tela
-                pygame.time.wait(2000)  # Espera 2 segundos para fechar o jogo
-                running = False
-
-    # Verifica se algum jogador morreu
-    if careca.check_death(levels[atual_index], "careca"):  # Se o Careca morreu
-        print("Careca morreu! kkkkkkkkkk")
-        running = False  # Encerra o jogo
-    if peixonalta.check_death(levels[atual_index], "peixonalta"):  # Se o Peixonalta morreu
-        print("Peixonalta morreu! kkkkkkkkkk")
-        running = False  # Encerra o jogo
-
-    # Atualiza e desenha inimigos
-    for inimigo in inimigos:
-        if type(inimigo) == Policial:
-            inimigo.update(careca, peixonalta, obstacles)  # Atualiza o inimigo
-        else:
-            inimigo.update()
+    atual_index = 0
         
-        inimigo.draw(SCREEN)  # Desenha o inimigo na tela
+    font = pygame.font.SysFont(None, 55)
 
-        # Verifica colisão entre inimigos e personagens
-        if isinstance(inimigo, InimigoCareca) and inimigo.rect.colliderect(careca.rect):  # Se o inimigo for InimigoCareca e colidir com o Careca
-            print("Careca foi pego pela cobra")
-            running = False  # Encerra o jogo
-        elif isinstance(inimigo, InimigoPeixonalta) and inimigo.rect.colliderect(peixonalta.rect):  # Se o inimigo for InimigoPeixonalta e colidir com o Peixonalta
-            print("Peixonalta foi pego pelo gato")
-            running = False  # Encerra o jogo
-        elif not isinstance(inimigo, (InimigoCareca, InimigoPeixonalta)):  # Para outros tipos de inimigos
-            if inimigo.rect.colliderect(careca.rect):  # Se o inimigo colidir com o Careca
-                print("Careca foi pego pelo guarda")
-                running = False  # Encerra o jogo
-            elif inimigo.rect.colliderect(peixonalta.rect):  # Se o inimigo colidir com o Peixonalta
-                print("Peixonalta foi pego pelo guarda")
-                running = False  # Encerra o jogo
+    def victory():
+        text = font.render("END", True, GREEN)
+        SCREEN.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
 
-    # Atualiza a tela a cada frame
-    display.update_screen()
-    pygame.display.flip()  # Atualiza a tela com as novas informações
-    pygame.display.update()
-    clock.tick(60)  # Controla a taxa de quadros por segundo (FPS), limitando a 60 FPS
+    num = 1
+    load_level(num)
+
+    while running:  # Loop principal do jogo
+        # Eventos do Pygame (ex: fechar a janela)
+        for event in pygame.event.get():  # Verifica todos os eventos do Pygame
+            if event.type == pygame.QUIT:  # Se o evento for o de fechar a janela
+                pygame.quit()
+                #running = False  # Interrompe o loop, fechando o jogo
+            display.handle_events(event)
+
+        SCREEN.blit(fundo_img, (0, 0)) # Desenha a tela de fundo
+
+        obstacles = draw_level(SCREEN, levels[atual_index]) # Desenha o nível e obtém os obstáculos
+
+        porta_careca.draw(SCREEN)
+        porta_peixonauta.draw(SCREEN)
+
+        careca.update(obstacles)  # Atualiza o estado do Careca
+        peixonalta.update(obstacles)  # Atualiza o estado do Peixonalta
+        careca.draw(SCREEN)  # Desenha o Careca na tela
+        peixonalta.draw(SCREEN)  # Desenha o Peixonalta na tela
+
+        # Controles do jogador
+        keys = pygame.key.get_pressed()  # Obtém o estado atual das teclas pressionadas
+        if keys[pygame.K_a]:  # Se a tecla 'a' for pressionada
+            careca.move(-1, obstacles, "left")  # Move o Careca para a esquerda
+        if keys[pygame.K_d]:  # Se a tecla 'd' for pressionada
+            careca.move(1, obstacles, "rigth")   # Move o Careca para a direita
+        if keys[pygame.K_w]:  # Se a tecla 'w' for pressionada
+            careca.jump()  # Faz o Careca pular
+        if not keys[pygame.K_a] and not keys[pygame.K_d]:
+            careca.move(0, obstacles, "idle")
+
+        if keys[pygame.K_LEFT]:  # Se a tecla de seta para a esquerda for pressionada
+            peixonalta.move(-1, obstacles, "left")  # Move o Peixonalta para a esquerda
+        if keys[pygame.K_RIGHT]:  # Se a tecla de seta para a direita for pressionada
+            peixonalta.move(1, obstacles, "rigth")   # Move o Peixonalta para a direita
+        if keys[pygame.K_UP]:  # Se a tecla de seta para cima for pressionada
+            peixonalta.jump()  # Faz o Peixonalta pular
+        if not keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
+            peixonalta.move(0, obstacles, "idle")
+
+        # Atualiza as chaves
+        for chave in chaves:
+            chave.colisao(careca)  # Verifica se o Careca pegou a chave
+            chave.colisao(peixonalta)  # Verifica se o Peixonalta pegou a chave
+            porta_careca.interact(careca, chave)
+            porta_peixonauta.interact(peixonalta, chave)
+
+        porta_careca.animate()
+        porta_peixonauta.animate()
+        
+        # Desenha as chaves no mapa
+        chaves.draw(SCREEN)  # Desenha cada chave no mapa
+        chaves.update()
+
+        if porta_careca.check_victory(careca) and careca.pegou_chave:
+            if porta_peixonauta.check_victory(peixonalta) and peixonalta.pegou_chave:
+                atual_index += 1
+                if atual_index < len(levels):  # Verifica se há mais níveis
+                    num += 1
+                    load_level(num)
+                else:
+                    victory()  # Exibe a mensagem de fim de jogo
+                    pygame.display.flip()  # Atualiza a tela
+                    pygame.time.wait(2000)  # Espera 2 segundos para fechar o jogo
+                    running = False
+
+        # Verifica se algum jogador morreu
+        if careca.check_death(levels[atual_index], "careca"):  # Se o Careca morreu
+            print("Careca morreu! kkkkkkkkkk")
+            running = False  # Encerra o jogo
+        if peixonalta.check_death(levels[atual_index], "peixonalta"):  # Se o Peixonalta morreu
+            print("Peixonalta morreu! kkkkkkkkkk")
+            running = False  # Encerra o jogo
+
+        # Atualiza e desenha inimigos
+        for inimigo in inimigos:
+            if type(inimigo) == Policial:
+                inimigo.update(careca, peixonalta, obstacles)  # Atualiza o inimigo
+            else:
+                inimigo.update()
+            
+            inimigo.draw(SCREEN)  # Desenha o inimigo na tela
+
+            # Verifica colisão entre inimigos e personagens
+            if isinstance(inimigo, InimigoCareca) and inimigo.rect.colliderect(careca.rect):  # Se o inimigo for InimigoCareca e colidir com o Careca
+                print("Careca foi pego pela cobra")
+                running = False  # Encerra o jogo
+            elif isinstance(inimigo, InimigoPeixonalta) and inimigo.rect.colliderect(peixonalta.rect):  # Se o inimigo for InimigoPeixonalta e colidir com o Peixonalta
+                print("Peixonalta foi pego pelo gato")
+                running = False  # Encerra o jogo
+            elif not isinstance(inimigo, (InimigoCareca, InimigoPeixonalta)):  # Para outros tipos de inimigos
+                if inimigo.rect.colliderect(careca.rect):  # Se o inimigo colidir com o Careca
+                    print("Careca foi pego pelo guarda")
+                    running = False  # Encerra o jogo
+                elif inimigo.rect.colliderect(peixonalta.rect):  # Se o inimigo colidir com o Peixonalta
+                    print("Peixonalta foi pego pelo guarda")
+                    running = False  # Encerra o jogo
+
+        # Atualiza a tela a cada frame
+        display.update_screen()
+        pygame.display.flip()  # Atualiza a tela com as novas informações
+        pygame.display.update()
+        clock.tick(60)  # Controla a taxa de quadros por segundo (FPS), limitando a 60 FPS
+    
+    pygame.quit()
+
+if __name__ == "__main__":
+    run_game()
