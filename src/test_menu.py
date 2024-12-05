@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 import pygame
 from menu import Button, Music, Display  
+
 class TestButton(unittest.TestCase):
 
     def setUp(self):

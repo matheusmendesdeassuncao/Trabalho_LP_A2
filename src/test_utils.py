@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import pygame
 import os
-from utils import load_image, draw_level, LEVEL1, LEVEL2, Obstacle  
+from utils import *
 
 class TestGameFunctions(unittest.TestCase):
 
@@ -14,7 +14,7 @@ class TestGameFunctions(unittest.TestCase):
         mock_load.return_value = MagicMock()
 
         # Testa se a função retorna a imagem carregada e redimensionada
-        image = load_image('dummy_path', 'dummy_image.png', 100, 100)
+        image = load_image(IMAGE_PATH, 'careca_final.png', 100, 100)
         self.assertIsNotNone(image)
 
         # Testa se a função retorna None para um caminho inexistente

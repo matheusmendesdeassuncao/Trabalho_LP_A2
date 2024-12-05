@@ -1,8 +1,9 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import pygame
-from game import load_level, Player, Door, InimigoCareca, InimigoPeixonalta, Policial, Chave
-from utils import SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_PATH
+from classes import Door, Policial
+from game import *
+from utils import *
 
 class TestGame(unittest.TestCase):
 

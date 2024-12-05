@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 import pygame
-from classes import animar, carregar_sprites, Obstacle, Door, Player, Policial, Inimigo
+from classes import animar, carregar_sprites, Obstacle, Door, Player, Policial, Inimigo, InimigoCareca, Chave
 
 class TestGameFunctions(unittest.TestCase):
     def setUp(self):
