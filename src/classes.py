@@ -2,18 +2,45 @@ import pygame
 import math
 
 def animar(frames, index, fps, frame_time):
-    if not frames:  # Se a lista de frames estiver vazia
-        print("Erro: Lista de frames está vazia!")
-        return None, index, frame_time
-    
+    """
+    Gerencia a animação dos sprites, atualizando o índice da imagem exibida.
+
+    Parameters:
+        frames (list): Uma lista de sprites para a animação.
+        index (int): O índice atual do sprite sendo exibido.
+        fps (int): O número de frames por segundo para a animação.
+
+    Returns:
+        image: Imagem no índice atual.
+        int: O índice final 
+    """
     frame_time += 1
     if frame_time >= fps:
         frame_time = 0
         index = (index + 1) % len(frames)
-        #index += 1
-        #if index >= len(frames):
-        #    index = 0
     return frames[index], index, frame_time
+
+def carregar_sprites(image_util, num_frames, frame_width, frame_height, start_x = 0, start_y = 0):
+    """
+    Carrega uma spritesheet e divide em múltiplos sprites.
+
+    Parameters:
+        image_util: A imagem da spritesheet.
+        num_frames (int): O número de sprites na spritesheet.
+        frame_width (int): Largura de cada frame
+        frame_height (int): Altura de cada frame
+        start_x (int): Posição inicial da largura
+        start_y (int): Posição inicial da altura
+
+    Returns:
+        list: Uma lista contendo os frames individuais
+    """
+    frames = []
+    for i in range(num_frames):
+        start_x_y = (i * frame_width + start_x, start_y)
+        img = image_util.subsurface(start_x_y, (frame_width, frame_height))
+        frames.append(img)
+    return frames
 
 # Classe que representa um obstáculo no jogo
 class Obstacle:
@@ -39,6 +66,17 @@ class Obstacle:
 
 class Door:
     def __init__(self, x, y, image, width, height, max_frames):
+        """
+        Inicializa a porta com a posição e sprites para animação.
+
+        Parameters:
+            x (int): A posição horizontal da porta.
+            y (int): A posição vertical da porta.
+            image: A spritesheet da porta a ser exibida na tela.
+            width (int): Largura da porta.
+            height (int): Altura da porta.
+            max_frames (int): Quantidade de frames na imagem
+        """
         self.rect = pygame.Rect(x, y, width, height)
         self.x = x
         self.y = y
@@ -70,6 +108,15 @@ class Door:
             self.opening = True
 
     def check_victory(self, player):
+        """
+        Verifica se o jogador alcançou a porta e possui a chave.
+
+        Parameters:
+            player (pygame.sprite.Sprite): O personagem principal do jogo.
+
+        Returns:
+            bool: Verdadeiro se o jogador alcançou a porta e possui a chave; caso contrário, Falso.
+        """
         porta_centro_x = self.x + self.width // 2
         porta_centro_y = self.y + self.height // 2
         tolerancia = 20
@@ -95,12 +142,6 @@ class Player(pygame.sprite.Sprite):
         """
         super().__init__()
         pygame.sprite.Sprite.__init__(self)
-        #self.rect = pygame.Rect(x, y, width, height)  # A área do Player (retângulo)
-
-        #self.image = image
-        #self.rect = self.image.get_rect()
-        #self.rect.x = x
-        #self.rect.y = y
 
         self.width = width
         self.height = height
@@ -112,20 +153,17 @@ class Player(pygame.sprite.Sprite):
         self.direction = pygame.Vector2(0, 0)  # Direção de movimento (horizontal e vertical)
         self.pegou_chave = False  # Adicionando o atributo pegou_chave
 
-        # Parado
-        self.idle = self.carregar_sprites(image, 2, width, height)
-        # Correndo
-        self.run_rigth = self.carregar_sprites(image, 2, width, height, width*2)
-        self.run_left = self.carregar_sprites(image, 2, width, height, width*4)
-        # Pulando
-        self.jump_rigth = self.carregar_sprites(image, 1, width, height, width*2)
-        self.jump_left = self.carregar_sprites(image, 1, width, height, width*4)
+        self.idle = carregar_sprites(image, 2, width, height)
+        
+        self.run_rigth = carregar_sprites(image, 2, width, height, width*2)
+        self.run_left = carregar_sprites(image, 2, width, height, width*4)
+        
+        self.jump_rigth = carregar_sprites(image, 1, width, height, width*2)
+        self.jump_left = carregar_sprites(image, 1, width, height, width*4)
 
         self.index_lista = 0
         self.image = self.idle[self.index_lista]
         self.rect = self.image.get_rect()
-        #self.rect.x = x
-        #self.rect.y = y
 
         if height > 64:
             self.rect = pygame.Rect(x, y, width, height-1)
@@ -137,14 +175,6 @@ class Player(pygame.sprite.Sprite):
 
         self.estado = 'idle'
         self.direcao = 'rigth'
-
-    def carregar_sprites(self, image_util, num_frames, frame_width, frame_height, start_x = 0, start_y = 0):
-        frames = []
-        for i in range(num_frames):
-            start_x_y = (i * frame_width + start_x, start_y)
-            img = image_util.subsurface(start_x_y, (frame_width, frame_height))
-            frames.append(img)
-        return frames
 
     def pegar_chave(self):
         # Supondo que a chave seja um objeto ou algo que você possa checar se foi pego
@@ -277,9 +307,6 @@ class Player(pygame.sprite.Sprite):
             elif tile == "V" and player_name == "peixonalta":
                 return True  # "V" mata apenas Peixonalta
         return False  # Retorna False se o Player não morreu
-    
-    #def desenhar_rects(self, tela):
-    #    pygame.draw.rect(tela, (0, 255, 0), self.rect, 2)
 
 class Inimigo(pygame.sprite.Sprite):
     def __init__(self, start_pos, y, image, width, height):
@@ -310,14 +337,6 @@ class Inimigo(pygame.sprite.Sprite):
         self.speed = 0
         self.pode_mover = False
         self.deteccao_distancia = 200
-
-    def carregar_sprites(self, image_util, num_frames, frame_width, frame_height, start_x = 0, start_y = 0):
-        frames = []
-        for i in range(num_frames):
-            start_x_y = (i * frame_width + start_x, start_y)
-            img = image_util.subsurface(start_x_y, (frame_width, frame_height))
-            frames.append(img)
-        return frames
 
     def move(self, obstacles):
         """
@@ -400,9 +419,6 @@ class Inimigo(pygame.sprite.Sprite):
             careca.morrer()
         elif isinstance(self, InimigoPeixonalta) and self.rect.colliderect(peixonalta.rect):
             peixonalta.morrer()
-    
-    #def desenhar_rects(self, tela):
-    #    pygame.draw.rect(tela, (255, 0, 0), self.rect, 2)
 
 class Policial(Inimigo):
     def __init__(self, x, y, image, width, height):
@@ -417,11 +433,11 @@ class Policial(Inimigo):
             height (int): A altura do Inimigo.
         """
         super().__init__(x, y, image, width, height)
-        # Parado
-        self.idle = self.carregar_sprites(image, 7, 44, 60) 
-        # Correndo
-        self.run_rigth = self.carregar_sprites(image, 7, 44, 60, 836)
-        self.run_left = self.carregar_sprites(image, 7, 44, 60, 1144)
+        
+        self.idle = carregar_sprites(image, 7, 44, 60) 
+        
+        self.run_rigth = carregar_sprites(image, 7, 44, 60, 836)
+        self.run_left = carregar_sprites(image, 7, 44, 60, 1144)
 
         self.index_lista = 0
         self.image = self.idle[self.index_lista]
@@ -506,14 +522,14 @@ class InimigoCareca(Inimigo):
         self.start_pos = start_pos
         self.direction = 1
 
-        self.left_frames = self.carregar_sprites(image, 4, 53, 37)
-        self.rigth_frames = self.carregar_sprites(image, 4, 53, 37, 212)
+        self.left_frames = carregar_sprites(image, 4, 53, 37)
+        self.rigth_frames = carregar_sprites(image, 4, 53, 37, 212)
 
         self.index_lista = 0
         self.fps = 7
         self.frame_time = 0
 
-    def update(self, careca, peixonalta, obstacles):
+    def update(self):
         """
         Atualiza o comportamento do InimigoCareca, buscando o Careca.
 
@@ -539,15 +555,6 @@ class InimigoCareca(Inimigo):
         frames = self.rigth_frames if self.direction == 1 else self.left_frames
         self.image, self.index_lista, self.frame_time = animar(frames, self.index_lista, self.fps, self.frame_time)
         
-        #self.frame_time += 1
-        #if self.frame_time >= self.fps:
-        #    self.frame_time = 0
-        #    self.index_lista += 1
-        #    if self.direction == 1:
-        #        self.image = self.rigth_frames[self.index_lista % 4]
-        #    else:
-        #        self.image = self.left_frames[self.index_lista % 4]
-
     def verificar_morte(self, careca):
         """
         Verifica se o InimigoCareca colidiu com o Careca, matando-o.
@@ -577,15 +584,15 @@ class InimigoPeixonalta(Inimigo):
         self.end_pos = start_pos + 200
         self.direction = 1
 
-        self.left_frames = self.carregar_sprites(image, 2, 64, 44, start_y = 20)
-        self.rigth_frames = self.carregar_sprites(image, 2, 64, 44, 128, 20)
+        self.left_frames = carregar_sprites(image, 2, 64, 44, start_y = 20)
+        self.rigth_frames = carregar_sprites(image, 2, 64, 44, 128, 20)
 
         self.index_lista = 0
         self.fps = 7
         self.frame_time = 0
         self.y = y + 20
 
-    def update(self, careca, peixonalta, obstacles):
+    def update(self):
         """
         Atualiza o comportamento do InimigoPeixonalta, buscando o Peixonalta.
 
@@ -605,20 +612,10 @@ class InimigoPeixonalta(Inimigo):
             else:
                 self.direction = 1
 
-        #self.rect.x = self.current_pos
         self.rect = pygame.Rect(self.current_pos, self.y, self.width, self.height)
 
         frames = self.rigth_frames if self.direction == 1 else self.left_frames
         self.image, self.index_lista, self.frame_time = animar(frames, self.index_lista, self.fps, self.frame_time)
-
-        #self.frame_time += 1
-        #if self.frame_time >= self.fps:
-        #    self.frame_time = 0
-        #    self.index_lista += 1
-        #    if self.direction == 1:
-        #        self.image = self.rigth_frames[self.index_lista % 2]
-        #    else:
-        #        self.image = self.left_frames[self.index_lista % 2]
 
     def verificar_morte(self, peixonalta):
         """

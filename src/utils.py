@@ -1,8 +1,6 @@
 import pygame
 import os
-from classes import Obstacle
-
-pygame.init()
+from classes import Obstacle, Door, Chave, Policial, Player, InimigoPeixonalta, InimigoCareca  
 
 # Define as cores utilizadas no jogo
 GREEN = (0, 255, 0)     # Cor para o obstáculo 'T'
@@ -43,34 +41,8 @@ def load_image(image_path, file_name, width, height):
         return None
 
 # Define o layout do nível do jogo.
-LEVEL1 = [
-    "##################################################",
-    "#                        U                       #",
-    "#                                       E        #",
-    "#          X    X                                #",
-    "#  XXXXX       X#XXXX                 XXXXX      #",
-    "#        XXXXXX                      X           #",
-    "#            V                       # U         #",
-    "#                 XXXXXXXX           #           #",
-    "#           X    X########X         X            #",
-    "#   XXX          ##########X                     #",
-    "#    T          X###########        XXX          #",
-    "#         X     ############           X         #",
-    "#        X#X    ############         T #         #",
-    "#               ############       X             #",
-    "#                                  #             #",
-    "#     XXXXX                        #   XXXXXXX   #",
-    "#     #####   X                        #####     #",
-    "#     #####X  #                       X#####     #",
-    "#     ######  #                   XX          XX #",
-    "#   XX######   XXX   XXXXXXX      ##            x#",
-    "#   ########   #       ##             XX  XXX    #",
-    "#   ########X                 X     V        XX  #",
-    "#   #########     XXX      XXX#     X     XX     #",
-    "##################################################"
-]
 
-LEVEL2 = [
+LEVEL1 = [
     "##################################################",
     "#                                                #",
     "#                                                #",
@@ -96,8 +68,39 @@ LEVEL2 = [
     "#          XXXXXXXX         XXXXXXXX           XX#",
     "#                                            XX###",
     "#                                          XX#####",
-    "##################################################"
+    "#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX#######"
 ]
+
+LEVEL2 = [
+    "##################################################",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#XXXXXXXX   XXXXXXXXXXXXXXXXXXXXX      XXXXXXXXXX#",
+    "#           ##                 ##             ####",
+    "#           ##                 ##XX           ####",
+    "#          X##                 ####          X####",
+    "#          ###                 ####         X#####",
+    "#          ###XXXX         XXXX####XX     XX######",
+    "#                                           ######",
+    "#                     XX                      ####",
+    "#                   XX##XXX                   ####",
+    "#XXX              XX#######XXXXXXXXXXXX       ####",
+    "# ##XX         XXX########                    ####",
+    "#   ##XXXXXXXXX##                             ####",
+    "#                                           XX####",
+    "#                                        XXX######",
+    "#                                XXXXXXXX#########",
+    "#                    XXXXXXX                     #",
+    "#      XXXXXXXXXXXXXX###   #                     #",
+    "#              ###         #XXXXXXXX             #",
+    "#              ###           #                   #",
+    "#XXX           ###                     XXX       #",
+    "####           ###                     ###       #",
+    "####XXXXXXXXXXX###XXXXXXXXXXXXXXXXXXXXX###XXXXXXX#"
+]
+
+levels = [LEVEL1, LEVEL2]
 
 fundo_img = load_image(IMAGE_PATH, 'playground/fundo.png', SCREEN_WIDTH, SCREEN_HEIGHT)
 piso_img = load_image(IMAGE_PATH, 'playground/piso.png', 32, 32)
