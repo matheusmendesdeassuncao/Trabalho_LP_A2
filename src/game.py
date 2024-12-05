@@ -1,9 +1,13 @@
 import pygame
 from classes import Player, Door, Policial, InimigoPeixonalta, InimigoCareca, Chave
 from utils import *
+from menu import Display
 
 # Inicializa o Pygame
 pygame.init()
+
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT)) 
+display = Display(SCREEN)
 
 pygame.display.set_caption("A fuga de careca e Peixonalta de Bangu")
 
@@ -94,7 +98,9 @@ while running:  # Loop principal do jogo
     # Eventos do Pygame (ex: fechar a janela)
     for event in pygame.event.get():  # Verifica todos os eventos do Pygame
         if event.type == pygame.QUIT:  # Se o evento for o de fechar a janela
-            running = False  # Interrompe o loop, fechando o jogo
+            pygame.quit()
+            #running = False  # Interrompe o loop, fechando o jogo
+        display.handle_events(event)
 
     SCREEN.blit(fundo_img, (0, 0)) # Desenha a tela de fundo
 
@@ -187,5 +193,7 @@ while running:  # Loop principal do jogo
                 running = False  # Encerra o jogo
 
     # Atualiza a tela a cada frame
+    display.update_screen()
     pygame.display.flip()  # Atualiza a tela com as novas informações
+    pygame.display.update()
     clock.tick(60)  # Controla a taxa de quadros por segundo (FPS), limitando a 60 FPS

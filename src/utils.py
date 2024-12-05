@@ -1,6 +1,6 @@
 import pygame
 import os
-from classes import Obstacle, Door, Chave, Policial, Player, InimigoPeixonalta, InimigoCareca  
+from classes import Obstacle
 
 # Define as cores utilizadas no jogo
 GREEN = (0, 255, 0)     # Cor para o obstáculo 'T'
@@ -126,11 +126,5 @@ def draw_level(screen, level):
             elif char == "X": # Se o carectere for 'X', desenha o piso externo
                 screen.blit(piso_img, (x * 32, y * 32)) 
                 obstacles.append(Obstacle(x * 32, y * 32))
-            elif char == "U":  # Se o caractere for 'U', desenha o obstáculo do tipo 'U'
-                pygame.draw.rect(screen, CIAN, (x * 32, y * 32, 32, 32))  # Desenha o obstáculo 'U' em ciano
-            elif char == "T":  # Se o caractere for 'T', desenha o obstáculo do tipo 'T'
-                pygame.draw.rect(screen, GREEN, (x * 32, y * 32, 32, 32))  # Desenha o obstáculo 'T' em verde
-            elif char == "V":  # Se o caractere for 'V', desenha o obstáculo do tipo 'V'
-                pygame.draw.rect(screen, YELLOW, (x * 32, y * 32, 32, 32))  # Desenha o obstáculo 'V' em amarelo
 
     return obstacles  # Retorna a lista de obstáculos desenhados
